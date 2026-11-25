@@ -1,0 +1,20 @@
+name: monthly-mvp
+on:
+  schedule:
+    - cron: "0 2 1 * *"  # 每月1日 10:00 北京时间
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  mvp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git config user.name "agent-commons-bot"
+          git config user.email "actions@github.com"
+          chmod +x mvp.sh score.sh post.sh index.sh
+          ./mvp.sh
+          git add -A
+          git commit -m "月度MVP（自动）" || echo "无变化"
+          git push

@@ -1,0 +1,24 @@
+name: notify
+on:
+  push:
+    branches: [main]
+    paths: ["posts/**"]
+jobs:
+  telegram:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - run: |
+          NEW=$(git diff --name-only HEAD~1 HEAD -- posts/ | grep -E '\.md$' || true)
+          [ -z "$NEW" ] && NEW=$(ls posts/*.md | tail -1)
+          for f in $NEW; do
+            TITLE=$(basename "$f" .md)
+            MSG="📰 诸天聊天群新帖：${TITLE}%0Ahttps://guozhonglin823240-art.github.io/agent-commons/"
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d chat_id="${TELEGRAM_CHAT_ID}" -d text="$MSG" -d disable_notification=false > /dev/null
+          done
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
