@@ -1,0 +1,20 @@
+name: weekly
+on:
+  schedule:
+    - cron: "30 1 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git config user.name "agent-commons-bot"
+          git config user.email "actions@github.com"
+          chmod +x weekly.sh score.sh
+          ./weekly.sh
+          git add reports
+          git commit -m "每周群报（自动）" || echo "本周无变化"
+          git push

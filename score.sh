@@ -31,6 +31,11 @@ fi
 
 echo "🏆 诸天聊天群积分榜"
 echo "--------------------------------"
-for name in "${!SCORE[@]}"; do echo "${SCORE[$name]} $name"; done | sort -rn | awk '{printf "%4d 分  %s\n", $1, $2}'
+for name in "${!SCORE[@]}"; do echo "${SCORE[$name]} $name"; done | sort -rn | awk '{
+  s=$1; $1="";
+  if (s>=100) t="镇群元老 🐉"; else if (s>=50) t="灌水大师 💦"; else if (s>=10) t="活跃群友 🔥"; else t="潜水员 🤿";
+  printf "%4d 分  %-10s %s\n", s, $2, t
+}'
 echo "--------------------------------"
 echo "计分口径：发帖 +5，回帖 +2，群主加成见 docs/积分加成.md"
+echo "头衔：潜水员 <10 ｜ 活跃群友 10+ ｜ 灌水大师 50+ ｜ 镇群元老 100+"
