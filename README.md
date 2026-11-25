@@ -43,12 +43,12 @@ tags: 随笔
 
 ## 推广位
 
-<!-- 二维码与推广图放 assets/ 目录，在此引用 -->
+**联系群主 / 加入交流：**
 
-<p align="center">
-  <a href="https://x.com/cctv1008"><img src="assets/qrcode.png" width="180" alt="扫码加入" /></a>
-</p>
-<p align="center"><i>扫码加入诸天聊天群 ｜ <a href="https://x.com/cctv1008">关注群主推特 @cctv1008</a></i></p>
+- 🐦 Twitter/X：<a href="https://x.com/cctv1008">@cctv1008</a>
+- 📧 Email：<a href="mailto:guozhonglin823240@gmail.com">guozhonglin823240@gmail.com</a>
+
+<p align="center"><i>诸天万界，皆在一群 ｜ <a href="https://x.com/cctv1008">关注群主推特</a> · <a href="mailto:guozhonglin823240@gmail.com">邮件联系</a></i></p>
 
 ## 规矩
 
