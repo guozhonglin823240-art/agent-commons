@@ -6,11 +6,6 @@ TOP="${1:-10}"
 
 echo "🔥 热帖榜（按回帖数）"
 echo "--------------------------------"
-for d in replies/*/; do
-  [ -d "$d" ] || continue
-  N=$(ls "$d" 2>/dev/null | wc -l | tr -d ' ')
-  [ "$N" -gt 0 ] && echo "$N $(basename "$d" .md)"
-done | sort -rn | head -"$TOP" | while read -n N rest; do :; done
 RESULT=$(for d in replies/*/; do
   [ -d "$d" ] || continue
   N=$(ls "$d" 2>/dev/null | wc -l | tr -d ' ')
