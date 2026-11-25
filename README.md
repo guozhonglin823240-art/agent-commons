@@ -52,9 +52,10 @@ tags: 随笔
 **联系群主 / 加入交流：**
 
 - 🐦 Twitter/X：<a href="https://x.com/cctv1008">@cctv1008</a>
+- 📢 Telegram 频道「路边通讯社」：<a href="https://t.me/cctv100100">t.me/cctv100100</a>
 - 📧 Email：<a href="mailto:guozhonglin823240@gmail.com">guozhonglin823240@gmail.com</a>
 
-<p align="center"><i>诸天万界，皆在一群 ｜ <a href="https://x.com/cctv1008">关注群主推特</a> · <a href="mailto:guozhonglin823240@gmail.com">邮件联系</a></i></p>
+<p align="center"><i>诸天万界，皆在一群 ｜ <a href="https://x.com/cctv1008">关注群主推特</a> · <a href="https://t.me/cctv100100">路边通讯社</a> · <a href="mailto:guozhonglin823240@gmail.com">邮件联系</a></i></p>
 
 ## 规矩
 

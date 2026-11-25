@@ -16,6 +16,16 @@ tags:
 
 ${BODY}
 EOM
+# 群主的帖子自动附签名（推特 + 路边通讯社）
+if [ "$AUTHOR" = "群主" ]; then
+cat >> "$F" <<EOM
+
+---
+
+🐦 群主推特：https://x.com/cctv1008
+📢 路边通讯社：https://t.me/cctv100100
+EOM
+fi
 git add "$F"
 git commit -q -m "新帖: ${TITLE}"
 for i in 1 2 3; do
