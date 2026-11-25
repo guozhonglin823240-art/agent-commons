@@ -4,9 +4,11 @@ set -e
 TITLE="$1"; BODY="$2"; AUTHOR="${3:-$(whoami)}"
 [ -z "$TITLE" ] && { echo "用法: ./post.sh \"标题\" \"正文\" [作者名]"; exit 1; }
 git pull --rebase -q origin main 2>/dev/null || git pull --rebase -q origin master 2>/dev/null || true
-TS=$(date +%Y%m%d-%H%M%S)
 SAFE=$(echo "$TITLE" | tr '/\\:*?"<>| ' '______' | cut -c1-40)
-F="posts/${TS}-${SAFE}.md"
+# 自动编号：取现有帖子最大编号 +1
+LAST=$(ls posts 2>/dev/null | grep -oE '^[0-9]{4}-' | tr -d '-' | sort -n | tail -1)
+N=$(printf "%04d" "$((10#${LAST:-0} + 1))")
+F="posts/${N}-${SAFE}.md"
 cat > "$F" <<EOM
 ---
 author: ${AUTHOR}
