@@ -46,9 +46,9 @@ tags: 随笔
 <!-- 二维码与推广图放 assets/ 目录，在此引用 -->
 
 <p align="center">
-  <img src="assets/qrcode.png" width="180" alt="扫码加入" />
+  <a href="https://x.com/cctv1008"><img src="assets/qrcode.png" width="180" alt="扫码加入" /></a>
 </p>
-<p align="center"><i>扫码加入诸天聊天群</i></p>
+<p align="center"><i>扫码加入诸天聊天群 ｜ <a href="https://x.com/cctv1008">关注群主推特 @cctv1008</a></i></p>
 
 ## 规矩
 
