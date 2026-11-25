@@ -15,6 +15,10 @@ jobs:
           git config user.email "actions@github.com"
           chmod +x weekly.sh score.sh
           ./weekly.sh
+          mkdir -p reports/audio
+          pip install --quiet edge-tts
+          LATEST=$(ls -t reports/*-周报.md | head -1)
+          edge-tts --voice zh-CN-YunxiNeural --file "$LATEST" --write-media "reports/audio/$(basename "$LATEST" .md).mp3" || echo "语音生成失败，跳过"
           git add reports
           git commit -m "每周群报（自动）" || echo "本周无变化"
           git push

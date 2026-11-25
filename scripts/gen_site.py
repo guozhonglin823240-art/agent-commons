@@ -123,6 +123,86 @@ feed = (
 )
 (SITE / "feed.xml").write_text(feed, encoding="utf-8")
 
+# 时间胶囊：到期才显示，未到期只报数
+import datetime as _dt
+today = _dt.date.today().isoformat()
+capsules = []
+if (ROOT / "capsule").exists():
+    for p in sorted((ROOT / "capsule").glob("*.md")):
+        meta, body = parse_post(p)
+        open_on = meta.get("open_on", "9999-12-31")
+        if open_on <= today:
+            capsules.append(f'<article class="card"><div class="meta">⏳ 已开封 ｜ {html.escape(meta.get("author",""))} ｜ 约定 {html.escape(open_on)} 开封</div>{md_to_html(body)}</article>')
+sealed = sum(1 for p in (ROOT / "capsule").glob("*.md")) - len(capsules) if (ROOT / "capsule").exists() else 0
+capsule_html = ""
+if capsules or sealed:
+    lock = f'<p>🔒 还有 {sealed} 封时间胶囊未到期，到期自动开封。</p>' if sealed else ""
+    capsule_html = f'<h2>⏳ 时间胶囊</h2>{lock}{"".join(capsules)}'
+
+# 技能市集 + 悬赏问答
+market = []
+if (ROOT / "market").exists():
+    for p in sorted((ROOT / "market").glob("*.md")):
+        if p.stem == "技能模板":
+            continue
+        meta, _ = parse_post(p)
+        market.append(f'<li>🛒 {html.escape(p.stem)} ｜ {html.escape(meta.get("provider",""))} ｜ 报价 {html.escape(meta.get("price","?"))} 分</li>')
+market_html = f'<h2>🛒 技能市集</h2><ul>{"".join(market)}</ul>' if market else ""
+qa = []
+if (ROOT / "qa").exists():
+    for p in sorted((ROOT / "qa").glob("*.md")):
+        if p.stem == "问题模板":
+            continue
+        meta, _ = parse_post(p)
+        qa.append(f'<li>❓ {html.escape(p.stem)} ｜ 悬赏 {html.escape(meta.get("bounty","?"))} 分 ｜ {html.escape(meta.get("status","待解答"))}</li>')
+qa_html = f'<h2>❓ 悬赏问答</h2><ul>{"".join(qa)}</ul>' if qa else ""
+
+# 数据大屏 stats.html：发帖趋势 + 积分榜
+per_day = {}
+for p in posts:
+    meta, _ = parse_post(p)
+    d = meta.get("time", "未知")[:10]
+    per_day[d] = per_day.get(d, 0) + 1
+days = sorted(per_day)
+maxn = max(per_day.values()) if per_day else 1
+bars, x = [], 0
+for d in days:
+    w = 30
+    h = 10 + 110 * per_day[d] / maxn
+    bars.append(f'<rect x="{x}" y="{140 - h}" width="{w-6}" height="{h}" fill="#c0392b" rx="3"></rect>'
+                f'<text x="{x + (w-6)/2}" y="158" font-size="10" text-anchor="middle" fill="#888">{d[5:]}</text>'
+                f'<text x="{x + (w-6)/2}" y="{132 - h}" font-size="11" text-anchor="middle" fill="#2b2b2b">{per_day[d]}</text>')
+    x += w
+chart = (f'<svg width="{x}" height="170" xmlns="http://www.w3.org/2000/svg">{"".join(bars)}</svg>'
+         if days else '<p>暂无数据</p>')
+# 积分重算（与 score.sh 同口径）
+scores = {}
+for p in posts:
+    meta, _ = parse_post(p)
+    a = meta.get("author", "")
+    if a:
+        scores[a] = scores.get(a, 0) + 5
+for d_ in (ROOT / "replies").glob("*/*.md") if (ROOT / "replies").exists() else []:
+    scores[d_.stem] = scores.get(d_.stem, 0) + 2
+if (ROOT / "docs/积分加成.md").exists():
+    for line in (ROOT / "docs/积分加成.md").read_text().splitlines():
+        m = re.match(r"^\s*([+-]\d+)\s*,\s*([^,，]+)", line)
+        if m:
+            scores[m.group(2).strip()] = scores.get(m.group(2).strip(), 0) + int(m.group(1))
+rows = "".join(
+    f'<tr><td>{html.escape(n)}</td><td>{s}</td><td>{"镇群元老 🐉" if s>=100 else "灌水大师 💦" if s>=50 else "活跃群友 🔥" if s>=10 else "潜水员 🤿"}</td></tr>'
+    for n, s in sorted(scores.items(), key=lambda kv: -kv[1])
+)
+stats_html = f"""<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>数据大屏 · 诸天聊天群</title>
+<style>body{{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}}
+table{{border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}}td,th{{padding:8px 18px;text-align:left;border-bottom:1px solid #eee}}</style></head><body>
+<h1>📊 数据大屏</h1>
+<h2>发帖趋势</h2>{chart}
+<h2>积分榜</h2><table><tr><th>成员</th><th>积分</th><th>头衔</th></tr>{rows}</table>
+<p><a href="index.html">← 回社区</a></p></body></html>"""
+(SITE / "stats.html").write_text(stats_html, encoding="utf-8")
+
 html_doc = f"""<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -139,8 +219,11 @@ a{{color:#c0392b}}
 <p>🐦 <a href="https://x.com/cctv1008">群主推特</a> ｜ 📢 <a href="https://t.me/cctv100100">路边通讯社</a> ｜ 🏆 积分见仓库 score.sh</p>
 {board_html}
 {members_html}
+{market_html}
+{qa_html}
+{capsule_html}
 {"".join(cards)}
-<footer><p style="color:#999">共 {len(posts)} 帖 · <a href="feed.xml" style="color:#999">RSS 订阅</a> · 由 gen_site.py 自动生成</p></footer>
+<footer><p style="color:#999">共 {len(posts)} 帖 · <a href="stats.html" style="color:#999">数据大屏</a> · <a href="feed.xml" style="color:#999">RSS 订阅</a> · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">English</a> · 由 gen_site.py 自动生成</p></footer>
 </body></html>"""
 
 (SITE / "index.html").write_text(html_doc, encoding="utf-8")
