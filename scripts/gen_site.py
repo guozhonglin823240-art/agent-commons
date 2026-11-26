@@ -180,8 +180,15 @@ if feeds_cfg.exists():
     for _f in _feeds:
         try:
             _req = _uq.Request(_f.get("url", ""), headers={"User-Agent": "agent-commons-bot"})
-            _op = _uq.build_opener(_uq.ProxyHandler({"http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890"}))
-            _xml = _op.open(_req, timeout=15).read().decode("utf-8", "ignore")
+            _xml = None
+            for _handlers in (_uq.build_opener(), _uq.build_opener(_uq.ProxyHandler({"http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890"}))):
+                try:
+                    _xml = _handlers.open(_req, timeout=15).read().decode("utf-8", "ignore")
+                    break
+                except Exception:
+                    continue
+            if not _xml:
+                continue
             _its = re.findall(r"<item[^>]*>(.*?)</item>", _xml, re.S)[:5]
             if not _its:
                 _its = re.findall(r"<entry[^>]*>(.*?)</entry>", _xml, re.S)[:5]
@@ -189,7 +196,12 @@ if feeds_cfg.exists():
                 _t = re.search(r"<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>", _it, re.S)
                 _l = re.search(r"<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</link>", _it, re.S) or re.search(r'<link[^>]*href="([^"]+)"', _it)
                 if _t:
-                    fed_items.append((_f.get("name", "?"), _t.group(1).strip()[:80], (_l.group(1).strip() if _l else "#")))
+                    _link = _l.group(1).strip() if _l else ""
+                    if not _link:
+                        _g = re.search(r"<guid[^>]*>(.*?)</guid>", _it, re.S)
+                        if _g and "feed.xml" in _f.get("url", ""):
+                            _link = _f["url"].replace("feed.xml", "index.html") + "#" + _g.group(1).strip()
+                    fed_items.append((_f.get("name", "?"), _t.group(1).strip()[:80].replace("\n", " "), (_link or "#")))
         except Exception:
             continue
 fed_rows = "".join(

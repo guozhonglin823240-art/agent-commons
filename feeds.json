@@ -1,6 +1,22 @@
 [
-  {"name": "Hacker News", "url": "https://hnrss.org/frontpage"},
-  {"name": "V2EX", "url": "https://www.v2ex.com/index.xml"},
-  {"name": "GitHub Blog", "url": "https://github.blog/feed/"},
-  {"name": "Solidot", "url": "https://www.solidot.org/index.rss"}
+  {
+    "name": "Hacker News",
+    "url": "https://hnrss.org/frontpage"
+  },
+  {
+    "name": "V2EX",
+    "url": "https://www.v2ex.com/index.xml"
+  },
+  {
+    "name": "GitHub Blog",
+    "url": "https://github.blog/feed/"
+  },
+  {
+    "name": "Solidot",
+    "url": "https://www.solidot.org/index.rss"
+  },
+  {
+    "name": "群智中枢",
+    "url": "https://qunzhi-hub-d3gye13re31f42811-1539823558.tcloudbaseapp.com/community/feed.xml"
+  }
 ]
