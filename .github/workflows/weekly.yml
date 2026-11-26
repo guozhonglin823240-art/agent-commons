@@ -29,7 +29,7 @@ jobs:
         run: |
           LATEST=$(ls -t reports/*-周报.md | head -1)
           head -c 3500 "$LATEST" > /tmp/report.txt
-          for CHAT in "${TELEGRAM_CHAT_ID}" "-1001644032233"; do
+          for CHAT in "${TELEGRAM_CHAT_ID}"; do
             curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
               --data-urlencode chat_id="$CHAT" --data-urlencode text@/tmp/report.txt > /dev/null
           done
