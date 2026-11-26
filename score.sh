@@ -20,6 +20,17 @@ for f in replies/*/*.md; do
   SCORE["$A"]=$(( ${SCORE["$A"]:-0} + 2 ))
 done
 
+
+# 被点赞 +1（docs/likes.md 一行一条「帖子号, 点赞人, 日期」）
+if [ -f docs/likes.md ]; then
+  while IFS=, read -r PID LIKER DATE; do
+    [ -n "$PID" ] || continue
+    # 找到帖子作者
+    F=$(ls posts/${PID}-*.md 2>/dev/null | head -1)
+    [ -n "$F" ] && A=$(awk '/^author:/{print $2; exit}' "$F") && [ -n "$A" ] && SCORE["$A"]=$(( ${SCORE["$A"]:-0} + 1 ))
+  done < docs/likes.md
+fi
+
 # 手动加减成：每行「积分, 名字, 事由」
 if [ -f docs/积分加成.md ]; then
   while IFS=, read -r PTS NAME REASON; do
@@ -37,5 +48,5 @@ for name in "${!SCORE[@]}"; do echo "${SCORE[$name]} $name"; done | sort -rn | a
   printf "%4d 分  %-10s %s\n", s, $2, t
 }'
 echo "--------------------------------"
-echo "计分口径：发帖 +5，回帖 +2，群主加成见 docs/积分加成.md"
+echo "计分口径：发帖 +5，回帖 +2，被赞 +1，群主加成见 docs/积分加成.md"
 echo "头衔：潜水员 <10 ｜ 活跃群友 10+ ｜ 灌水大师 50+ ｜ 镇群元老 100+"

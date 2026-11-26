@@ -125,6 +125,21 @@ def board_of(meta):
             return bd
     return "综合"
 
+def quality_of(meta, body):
+    """自动质量分 0-100：内容量/链接/媒体/标签/五要素，规则透明可复算"""
+    score = 40
+    n = len(body.strip())
+    if n > 500: score += 20
+    elif n > 200: score += 12
+    elif n > 80: score += 5
+    if re.search(r'https?://', body): score += 15
+    if re.search(r'<img|<video|!\[|\.mp4|\.jpg|\.png|\.webp', body, re.I): score += 15
+    tags = [t.strip() for t in meta.get("tags","").split(",") if t.strip()]
+    if len(tags) >= 2: score += 10
+    five = sum(1 for k in ["是什么", "底细", "真假", "利", "弊"] if k in body)
+    score += min(five * 3, 15)  # 五要素最多+15
+    return min(score, 100)
+
 cards = []
 for p in posts:
     meta, body = parse_post(p)
@@ -135,8 +150,9 @@ for p in posts:
     bd_name = board_of(meta)
     _tg = [t.strip() for t in meta.get("tags","").split(",") if t.strip()]
     tags_attr = html.escape(" ".join(_tg))
+    q = quality_of(meta, body)
     cards.append(
-        f'<article class="card" data-board="{bd_name}" data-tags="{tags_attr}" id="{num}"><div class="meta">{html.escape(meta.get("time",""))}'
+        f'<article class="card" data-board="{bd_name}" data-tags="{tags_attr}" id="{num}"><div class="meta">{html.escape(meta.get("time",""))}<span class="qscore">🎯{q}</span>'
         f' ｜ {html.escape(meta.get("author",""))} ｜ {html.escape(meta.get("tags",""))}{star}</div>'
         f'{sum_html}'
         f"{md_to_html(body)}</article>"
@@ -363,6 +379,7 @@ for p in posts:
         "author": meta.get("author", ""),
         "time": meta.get("time", ""),
         "date": meta.get("time", "")[:10],
+        "quality": quality_of(meta, body),
         "tags": [t.strip() for t in meta.get("tags", "").split(",") if t.strip()],
         "board": board_of(meta),
         "summary": first_para(body),
@@ -404,7 +421,10 @@ a{{color:#c0392b}}
 .btab{{border:1px solid #ddd;background:#fff;border-radius:20px;padding:6px 14px;font-size:14px;cursor:pointer}}
 .btab.on{{background:#c0392b;color:#fff;border-color:#c0392b}}
 .ttab{{border:1px solid #ddd;background:#fff;border-radius:20px;padding:3px 10px;font-size:12px;cursor:pointer;margin:2px}}
-.ttab.on{{background:#2c5f8a;color:#fff;border-color:#2c5f8a}}</style></head><body>
+.ttab.on{{background:#2c5f8a;color:#fff;border-color:#2c5f8a}}
+.stab{{border:1px solid #ddd;background:#fff;border-radius:6px;padding:4px 12px;font-size:13px;cursor:pointer}}
+.stab.on{{background:#c0392b;color:#fff;border-color:#c0392b}}
+.qscore{{float:right;color:#c0392b;font-weight:bold}}</style></head><body>
 <h1>🪪 {html.escape(name)}</h1>
 <div class="card"><p>🏅 积分 <strong>{sc}</strong> ｜ 头衔 {_title_of(sc)}</p>
 <p>📝 发帖 {len(posts_by.get(name, []))} 篇 ｜ 💬 回帖 {len(replies_by.get(name, []))} 条</p></div>
@@ -519,6 +539,7 @@ blockquote.twitter-tweet,blockquote.telegram-message{{background:#f0f4f8;border-
 {capsule_html}
 {tabs_html}
 {tags_html}
+<div id="sortbar" style="margin:10px 0"><span style="color:#888;font-size:.85em">↕️</span> <button class="stab on" data-s="time">最新</button> <button class="stab" data-s="quality">质量分</button> <button class="stab" data-s="likes">最热</button></div>
 {"".join(cards)}
 <script src="search-data.js"></script>
 <script>
@@ -536,6 +557,21 @@ q.addEventListener('input',()=>{{
   hint.textContent=n?('找到 '+n+' 篇'):'没找到，换个词试试';
 }});
 
+
+document.querySelectorAll('.stab').forEach(b=>b.addEventListener('click',()=>{{
+  document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const mode=b.dataset.s;
+  const box=document.querySelectorAll('article.card');
+  const arr=[...box];
+  arr.sort((x,y)=>{{
+    if(mode==='time') return (y.id||'').localeCompare(x.id||'');
+    const px=POSTS.find(p=>p.id===x.id)||{{}}, py=POSTS.find(p=>p.id===y.id)||{{}};
+    if(mode==='likes') return (py.likes||0)-(px.likes||0) || (py.quality||0)-(px.quality||0);
+    return (py.quality||0)-(px.quality||0) || (py.likes||0)-(px.likes||0);
+  }});
+  arr.forEach(c=>c.parentNode.appendChild(c));
+}}}});
 document.querySelectorAll('.ttab').forEach(t=>t.addEventListener('click',()=>{{
   const on=t.classList.contains('on');
   document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('on'));
