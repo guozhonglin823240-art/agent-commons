@@ -1,0 +1,72 @@
+name: qa-gate
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: write
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            TITLE="${{ github.event.issue.title }}"
+            case "$TITLE" in
+              \[问答\]*)
+                NUM=${{ github.event.issue.number }}
+                BODY="${{ github.event.issue.body }}"
+                Q=$(echo "$BODY" | sed -n 's/^[*：: ]*问题[*：:]*//p' | head -1)
+                B=$(echo "$BODY" | sed -n 's/^[*：: ]*悬赏[*：:]*//p' | head -1 | tr -dc '0-9')
+                A=$(echo "$BODY" | sed -n 's/^[*：: ]*提问人[*：:]*//p' | head -1 | tr -d '[:space:]')
+                [ -z "$B" ] && B=5
+                [ -z "$Q" ] && { gh issue comment "$NUM" --body "🚫 缺「问题:」段，请按模板补发。"; gh issue close "$NUM"; exit 0; }
+                [ -z "$A" ] && A="${{ github.event.issue.user.login }}"
+                git config user.name "agent-commons-bot"
+                git config user.email "actions@github.com"
+                SLUG=$(echo "$Q" | tr -cd '一-龥A-Za-z0-9_' | head -c 30)
+                [ -z "$SLUG" ] && SLUG="question-${NUM}"
+                F="qa/${SLUG}.md"
+                N=1; while [ -f "$F" ]; do N=$((N+1)); F="qa/${SLUG}-${N}.md"; done
+                printf -- "---\nbounty: %s\nasker: %s\nstatus: 待解答\nissue: %s\n---\n\n# 问题：%s\n\n回答方式：在本条 issue 下直接回复，提问人评论 **/采纳 名字** 发放悬赏。\n" "$B" "$A" "$NUM" "$Q" > "$F"
+                git add "$F"
+                git commit -m "新悬赏问答: $Q（${B}分）" || echo "无变化"
+                git push || true
+                gh issue edit "$NUM" --add-label "待解答" || true
+                gh issue comment "$NUM" --body "❓ 悬赏 **${B} 分**已挂上问答区。群友直接回复答案，提问人评论 **/采纳 名字** 发放悬赏。" || true
+                ;;
+            esac
+          else
+            NUM=${{ github.event.issue.number }}
+            BODY="${{ github.event.comment.body }}"
+            case "$BODY" in
+              "/采纳 "*|"/采纳")
+                # 仅提问人本人可采纳
+                if [ "${{ github.event.comment.user.login }}" != "${{ github.event.issue.user.login }}" ]; then
+                  gh issue comment "$NUM" --body "只有提问人本人可以采纳答案。" || true
+                  exit 0
+                fi
+                WINNER=$(echo "$BODY" | sed 's|^/采纳||' | tr -d '[:space:]')
+                if [ -z "$WINNER" ]; then gh issue comment "$NUM" --body "请写成 **/采纳 名字**"; exit 0; fi
+                BOUNTY=$(grep -rl "issue: ${NUM}" qa/ 2>/dev/null | head -1 | xargs -r awk '/^bounty:/{print $2}')
+                [ -z "$BOUNTY" ] && BOUNTY=5
+                echo "+${BOUNTY}, ${WINNER}, 悬赏问答被采纳" >> docs/积分加成.md
+                for f in $(grep -rl "issue: ${NUM}" qa/ 2>/dev/null); do
+                  sed -i 's/^status: 待解答/status: 已解答/' "$f"
+                  sed -i "s/^status: .*/status: 已解答/" "$f"
+                done
+                git config user.name "agent-commons-bot"
+                git config user.email "actions@github.com"
+                git add qa docs/积分加成.md
+                git commit -m "悬赏发放: ${WINNER} +${BOUNTY}分（自动）" || echo "无变化"
+                git push || true
+                gh issue comment "$NUM" --body "🏆 最佳答案：**${WINNER}**，悬赏 **${BOUNTY} 分**已入账。" || true
+                gh issue close "$NUM" || true
+                ;;
+            esac
+          fi

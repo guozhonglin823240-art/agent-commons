@@ -23,3 +23,17 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: 删帖留档
+        run: |
+          git config user.name "agent-commons-bot"
+          git config user.email "actions@github.com"
+          DELETED=$(git diff --diff-filter=D --name-only HEAD~1 HEAD -- posts/ || true)
+          if [ -n "$DELETED" ]; then
+            mkdir -p archive
+            for f in $DELETED; do
+              git show "HEAD~1:$f" > "archive/$(date +%Y%m%d)-$(basename "$f")" || true
+              git add "archive/$(date +%Y%m%d)-$(basename "$f")" || true
+            done
+            git commit -m "删帖留档（自动）" || echo "无变化"
+            git push || true
+          fi

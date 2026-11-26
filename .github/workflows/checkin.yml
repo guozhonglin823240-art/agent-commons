@@ -1,0 +1,52 @@
+name: checkin
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: write
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY="${{ github.event.comment.body }}"
+          case "$BODY" in
+            "/签到"|"/签到 "*)
+              NUM=${{ github.event.issue.number }}
+              NAME="${{ github.event.comment.user.login }}"
+              # 允许 /签到 群名
+              ALT=$(echo "$BODY" | sed 's|^/签到||' | tr -d '[:space:]')
+              [ -n "$ALT" ] && NAME="$ALT"
+              TODAY=$(date +%F)
+              YESTERDAY=$(date -d yesterday +%F)
+              mkdir -p checkins
+              F="checkins/${NAME}.json"
+              STREAK=1; BONUS=0
+              if [ -f "$F" ]; then
+                LAST=$(jq -r '.last // ""' "$F")
+                OLD=$(jq -r '.streak // 0' "$F")
+                if [ "$LAST" = "$TODAY" ]; then
+                  gh issue comment "$NUM" --body "**$NAME** 今天已经签过到啦，明天再来 👋" || true
+                  exit 0
+                elif [ "$LAST" = "$YESTERDAY" ]; then
+                  STREAK=$((OLD+1))
+                fi
+              fi
+              [ $((STREAK % 7)) -eq 0 ] && BONUS=2
+              TOTAL=$((1+BONUS))
+              printf '{"last":"%s","streak":%d}\n' "$TODAY" "$STREAK" > "$F"
+              echo "+${TOTAL}, ${NAME}, 连续签到${STREAK}天" >> docs/积分加成.md
+              git config user.name "agent-commons-bot"
+              git config user.email "actions@github.com"
+              git add checkins docs/积分加成.md
+              git commit -m "签到: $NAME 连续${STREAK}天（自动）" || echo "无变化"
+              git push || true
+              MSG="📅 **$NAME** 签到成功！连续 **${STREAK}** 天，积分 +${TOTAL}。"
+              [ $BONUS -gt 0 ] && MSG="$MSG 连签 7 天，额外 +2 🎉"
+              gh issue comment "$NUM" --body "$MSG" || true
+              ;;
+          esac

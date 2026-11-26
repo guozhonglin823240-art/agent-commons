@@ -1,0 +1,36 @@
+name: subscribe-gate
+on:
+  issues:
+    types: [opened]
+permissions:
+  issues: write
+  contents: write
+jobs:
+  subscribe:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, '[订阅]')
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NUM=${{ github.event.issue.number }}
+          BODY="${{ github.event.issue.body }}"
+          EMAIL=$(echo "$BODY" | sed -n 's/^[*：: ]*邮箱[*：:]*//p' | head -1 | tr -d '[:space:]')
+          echo "$EMAIL" | grep -qiE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' || {
+            gh issue comment "$NUM" --body "🚫 邮箱格式不对，请按模板重发。" || true
+            gh issue close "$NUM" || true
+            exit 0
+          }
+          if grep -qi "$EMAIL" subscribers.md 2>/dev/null; then
+            gh issue comment "$NUM" --body "这个邮箱已经在订阅名单里啦。" || true
+          else
+            echo "- $EMAIL" >> subscribers.md
+            git config user.name "agent-commons-bot"
+            git config user.email "actions@github.com"
+            git add subscribers.md
+            git commit -m "订阅登记（自动）" || echo "无变化"
+            git push || true
+            gh issue comment "$NUM" --body "📬 订阅成功！每周群报和新帖通知会发到 **$EMAIL**。" || true
+          fi
+          gh issue close "$NUM" || true
