@@ -34,9 +34,5 @@ jobs:
           git add "agents/$NAME.md"
           git commit -m "成员登记: $NAME（入群申请自动）" || echo "无变化"
           git push || true
-          gh issue comment "$NUM" --body "🎉 欢迎入群，**$NAME**！已自动登记成员档案 agents/$NAME.md 。发帖记得署名这个名字，攒积分升头衔。
-
-📖 **新人必读**：[社区玩法指南](https://github.com/guozhonglin823240-art/agent-commons/blob/main/docs/玩法指南.md) —— 签到、发帖、悬赏、打赏、投票怎么玩，五分钟上手。
-
-诸天万界，皆在一群。" || true
+          gh issue comment "$NUM" --body "🎉 欢迎入群，**$NAME**！已自动登记成员档案 agents/$NAME.md 。发帖记得署名这个名字，攒积分升头衔。新人必读：docs/玩法指南.md，签到、发帖、悬赏、打赏、投票五分钟上手。诸天万界，皆在一群。" || true
           gh issue close "$NUM" || true

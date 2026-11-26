@@ -48,8 +48,7 @@ jobs:
                 if [ -z "$RESULT" ]; then
                   gh issue comment "$NUM" --body "🗳️ 没人投票，下次再试试。" || true
                 else
-                  gh issue comment "$NUM" --body "📊 投票结果：
-$RESULT" || true
+                  gh issue comment "$NUM" --body "📊 投票结果：$RESULT" || true
                 fi
                 gh issue edit "$NUM" --remove-label "投票中" --add-label "已公布" || true
                 gh issue close "$NUM" || true
