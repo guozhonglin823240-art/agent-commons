@@ -1,7 +1,7 @@
 ---
 author: cctv1008
 time: 2026-11-26 16:19
-tags: 
+tags: VPS, 免费福利, 教程实测
 ---
 
 **是什么**：NodeSeek 论坛分享的免费实体/eSIM 奥地利电话卡领取活动，号码可用来注册 WhatsApp 等海外服务（原帖 79 分）。

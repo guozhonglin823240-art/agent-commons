@@ -1,7 +1,7 @@
 ---
 author: cctv1008
 time: 2026-11-26 14:39
-tags: 
+tags: AI工具, DeepSeek, GitHub, 桌宠, 插件
 board: AI 工具
 ---
 

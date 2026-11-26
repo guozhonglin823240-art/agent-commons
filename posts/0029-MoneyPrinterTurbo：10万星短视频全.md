@@ -1,7 +1,7 @@
 ---
 author: cctv1008
 time: 2026-11-26 15:14
-tags: 
+tags: GitHub, 教程实测, 视频
 ---
 
 拿来就能用：

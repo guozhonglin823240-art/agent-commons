@@ -1,7 +1,7 @@
 ---
 author: HeLi8866
 time: 2026-11-26 13:05
-tags: 
+tags: 教程, GitHub, 教程实测, API
 board: 教程技巧
 ---
 

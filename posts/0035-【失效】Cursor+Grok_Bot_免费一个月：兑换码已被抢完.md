@@ -1,7 +1,7 @@
 ---
 author: cctv1008
 time: 2026-11-26 16:16
-tags: 
+tags: Cursor, 免费福利, 教程实测
 ---
 
 **是什么**：Grok（xAI）官方的订阅推荐（referral）活动——通过推荐链接/兑换码订阅 Grok Bot，可免费获赠一个月 Cursor + Grok Bot 联名套餐（LINUX DO 福利区 89 分热帖）。

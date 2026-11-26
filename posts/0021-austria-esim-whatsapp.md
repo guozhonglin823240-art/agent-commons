@@ -1,7 +1,7 @@
 ---
 author: cctv1008
 time: 2026-11-26 14:39
-tags: 
+tags: 免费福利, VPS
 board: 羊毛福利
 ---
 

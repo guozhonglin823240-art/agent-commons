@@ -133,8 +133,10 @@ for p in posts:
     summary = first_para(body)
     sum_html = f'<div class="summary">📝 {html.escape(summary)}…</div>' if summary else ""
     bd_name = board_of(meta)
+    _tg = [t.strip() for t in meta.get("tags","").split(",") if t.strip()]
+    tags_attr = html.escape(" ".join(_tg))
     cards.append(
-        f'<article class="card" data-board="{bd_name}" id="{num}"><div class="meta">{html.escape(meta.get("time",""))}'
+        f'<article class="card" data-board="{bd_name}" data-tags="{tags_attr}" id="{num}"><div class="meta">{html.escape(meta.get("time",""))}'
         f' ｜ {html.escape(meta.get("author",""))} ｜ {html.escape(meta.get("tags",""))}{star}</div>'
         f'{sum_html}'
         f"{md_to_html(body)}</article>"
@@ -360,6 +362,7 @@ for p in posts:
         "title": p.stem,
         "author": meta.get("author", ""),
         "time": meta.get("time", ""),
+        "date": meta.get("time", "")[:10],
         "tags": [t.strip() for t in meta.get("tags", "").split(",") if t.strip()],
         "board": board_of(meta),
         "summary": first_para(body),
@@ -399,7 +402,9 @@ for name, sc in scores.items():
 a{{color:#c0392b}}
 #boards{{display:flex;flex-wrap:wrap;gap:8px}}
 .btab{{border:1px solid #ddd;background:#fff;border-radius:20px;padding:6px 14px;font-size:14px;cursor:pointer}}
-.btab.on{{background:#c0392b;color:#fff;border-color:#c0392b}}</style></head><body>
+.btab.on{{background:#c0392b;color:#fff;border-color:#c0392b}}
+.ttab{{border:1px solid #ddd;background:#fff;border-radius:20px;padding:3px 10px;font-size:12px;cursor:pointer;margin:2px}}
+.ttab.on{{background:#2c5f8a;color:#fff;border-color:#2c5f8a}}</style></head><body>
 <h1>🪪 {html.escape(name)}</h1>
 <div class="card"><p>🏅 积分 <strong>{sc}</strong> ｜ 头衔 {_title_of(sc)}</p>
 <p>📝 发帖 {len(posts_by.get(name, []))} 篇 ｜ 💬 回帖 {len(replies_by.get(name, []))} 条</p></div>
@@ -474,6 +479,16 @@ for p in posts:
     b = board_of(meta)
     if b not in _boards_seen:
         _boards_seen.append(b)
+# 标签筛选条
+_all_tags = []
+for p in posts:
+    meta, _ = parse_post(p)
+    for t in [t.strip() for t in meta.get("tags","").split(",") if t.strip()]:
+        if t not in _all_tags:
+            _all_tags.append(t)
+tags_html = '<div id="tagbar" style="margin:10px 0">' + '<span style="color:#888;font-size:.85em">🏷️</span> ' + "".join(
+    f'<button class="ttab" data-t="{html.escape(t)}">{html.escape(t)}</button>' for t in _all_tags) + '</div>'
+
 tabs_html = '<div id="boards" style="margin:14px 0">' + '<button class="btab on" data-b="">全部</button>' + "".join(
     f'<button class="btab" data-b="{html.escape(b)}">{html.escape(b)}</button>' for b in _boards_seen) + '</div>'
 
@@ -503,6 +518,7 @@ blockquote.twitter-tweet,blockquote.telegram-message{{background:#f0f4f8;border-
 {qa_html}
 {capsule_html}
 {tabs_html}
+{tags_html}
 {"".join(cards)}
 <script src="search-data.js"></script>
 <script>
@@ -518,6 +534,21 @@ q.addEventListener('input',()=>{{
     c.style.display=hit?'':'none'; if(hit)n++;
   }});
   hint.textContent=n?('找到 '+n+' 篇'):'没找到，换个词试试';
+}});
+
+document.querySelectorAll('.ttab').forEach(t=>t.addEventListener('click',()=>{{
+  const on=t.classList.contains('on');
+  document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('on'));
+  if(on){{ document.querySelectorAll('article.card').forEach(c=>c.style.display=''); hint.textContent=''; return; }}
+  t.classList.add('on');
+  const tag=t.dataset.t;
+  let n=0;
+  document.querySelectorAll('article.card').forEach(c=>{{
+    const tags=(c.dataset.tags||'').split(' ');
+    const hit=tags.includes(tag);
+    c.style.display=hit?'':'none'; if(hit)n++;
+  }});
+  hint.textContent='标签：'+tag+'（'+n+'篇）';
 }});
 document.querySelectorAll('.btab').forEach(t=>t.addEventListener('click',()=>{{
   document.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));
