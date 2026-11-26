@@ -204,6 +204,70 @@ blockquote.twitter-tweet,blockquote.telegram-message{background:#f0f4f8;border-l
 <p>现在这两种利益诉求，甚至出现在了同一家公司内部，腾讯准备让谁给谁让路？</p>
 <p>原帖（Kxians）：</p>
 <blockquote class="twitter-tweet"><a href="https://x.com/xulijian1994/status/2125603197448565050"></a></blockquote>
-<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article>
+<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article><article class="card" id="0018"><div class="meta">Chinese original — English translation coming</div><p>🤯炸裂！有人直接绕过了 Linux，手搓了一个仅有 24KB 的 AI 操作系统！！</p>
+<p>纯 x86-64 汇编编写，直接运行 Qwen3-0.6B，CPU 推理速度比 Linux 环境下的 llama.cpp 最高快 54%！</p>
+<p>这个操作系统有多离谱？</p>
+<p>・整个内核二进制文件仅 24,252 字节 ・不依赖 Linux、Windows、C、Rust 或 libc </p>
+<p>・内核启动仅需 74～94 毫秒</p>
+<p>・通过 APIC 唤醒全部 CPU 核心 </p>
+<p>・将 614 MiB 的 Q8_0 量化模型权重直接映射到物理内存 </p>
+<p>・支持 VGA 显示、PS/2 键盘、串口及带 KV 缓存的实时多轮对话</p>
+<p>在同一台 AMD EPYC 7642 上，与 llama.cpp 进行 CPU 推理性能对比：</p>
+<p>&gt; 1 线程：23.67 vs 16.63 tok/s（+42%）</p>
+<p>&gt; 4 线程：78.89 vs 51.08 tok/s（+54%）</p>
+<p>&gt; 8 线程：118.08 vs 80.79 tok/s（+46%）</p>
+<p>&gt; 16 线程：134.94 vs 103.03 tok/s（+31%，峰值 136.6）</p>
+<p>更离谱的是，这玩意儿甚至能在一台没有硬盘、仅有 2 GiB 内存、搭载 2014 年 Intel Xeon E5-2670 v3 的 Proxmox 虚拟机上运行。</p>
+<p>实测解码速度达到 55.4 tok/s，还提供了兼容 BIOS 和 UEFI 的 ISO 镜像构建工具。</p>
+<p>性能提升的同时，精度也没有明显拉胯。</p>
+<p>不同线程数下的输出保持逐位一致，测试中的 64 个贪心解码 Token 全部与 PyTorch FP32 匹配，余弦相似度达到 0.99965。</p>
+<p>除此之外，还有一个仅 14.7KB 的 Linux ELF 版本，在 1～40 线程下比 llama.cpp 快 18%～36%。</p>
+<p>通过裸机环境下的 2 MiB 大页内存映射，还能进一步榨出约 10% 的性能。</p>
+<p>别人还在研究如何优化 AI 推理框架，这老哥直接为 AI 手搓了一个操作系统。</p>
+<p>这才叫真正的极限性能优化！</p>
+<p>仓库链接放评论区了👇 https://x.com/superalesha/status/2125682626056839259/video/1</p>
+<p>原帖（何笠同学）：</p>
+<blockquote class="twitter-tweet"><a href="https://x.com/HeLi8866/status/2125777542082879938"></a></blockquote>
+<video controls preload="metadata"><source src="https://video.twimg.com/ext_tw_video/2125681516449550336/pu/vid/avc1/1040x720/efVlOYXFgxkASoc4.mp4?tag=12"></video>
+<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article><article class="card" id="0019"><div class="meta">Chinese original — English translation coming</div><p>I deleted Linux completely, baked Qwen3-0.6B into a 24 KB pure x86-64 assembly OS, and it runs up to 54% faster than native Linux llama.cpp.</p>
+<p>The entire Multiboot OS binary (asm-llm-os.elf) is 24,252 bytes, written from scratch without Linux, Windows, C, Rust, or libc. It boots in 74 to 94 ms straight into 64-bit Long Mode, wakes every CPU core over APIC, maps the 614 MiB Q8_0 weights directly from physical RAM, and drops you into a live multi-turn KV-cache chat over VGA, PS/2 keyboard, and serial.</p>
+<p>I ran head-to-head CPU benchmarks against llama.cpp (Q8_0, -ngl 0) on the same AMD EPYC 7642:</p>
+<li>1 thread hits 23.67 tok/s vs 16.63 (+42%)</li>
+<li>4 threads hit 78.89 tok/s vs 51.08 (+54%)</li>
+<li>8 threads hit 118.08 tok/s vs 80.79 (+46%)</li>
+<li>16 threads hit 134.94 tok/s vs 103.03 (+31%, 136.6 peak)</li>
+<p>On a diskless 0 GB Proxmox VM (2014 12-core Intel Xeon E5-2670 v3, 2 GiB RAM), it boots straight to the prompt in under 5 seconds (95 ms kernel boot) and runs live out of RAM at 78 tok/s decode and up to 111.5 tok/s prefill, with a hybrid BIOS+UEFI ISO builder included too. Output stays bit-exact across thread counts and matches all 64 greedy tokens against PyTorch FP32 (0.99965 cosine).</p>
+<p>The 14.7 KB Linux ELF build (FAST_Q8=1 INT8xINT8 AVX2+F16C) also beats llama.cpp by 18% to 36% from 1 to 40 threads, and booting bare metal with 2 MiB huge pages squeezes out another 10% on top.</p>
+<p>Repo, ISO builder, and Proxmox setup guide are in the reply below.</p>
+<p>原帖（Alexey Fateev）：</p>
+<blockquote class="twitter-tweet"><a href="https://x.com/superalesha/status/2125682626056839259"></a></blockquote>
+<video controls preload="metadata"><source src="https://video.twimg.com/ext_tw_video/2125681516449550336/pu/vid/avc1/1040x720/efVlOYXFgxkASoc4.mp4?tag=12"></video>
+<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article><article class="card" id="0020"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>免费GPU和服务器攻略，提示词直接给 muse 即可薅。</p>
+<li>平台：LINUX DO 福利 · 免费 · 70分</li>
+<li>链接：https://linux.do/t/topic/3223815</li></article><article class="card" id="0021"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>有空的可以点下领取奥地利 esim，其他有需要可以点这里。</p>
+<li>平台：NodeSeek · 免费 · 79分</li>
+<li>链接：https://www.nodeseek.com/post-1073047-1</li></article><article class="card" id="0022"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>送两个 muse 账号（bot 领取的，没登过，不确定能不能用）。</p>
+<li>平台：LINUX DO 福利 · 63分</li>
+<li>链接：https://linux.do/t/topic/3224029</li></article><article class="card" id="0023"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>⚡ 新动态 · 含兑换码</p>
+<p>码：PQ47-12KP-BNYP-9X2C</p>
+<p>链接：https://grok.com/plans/referral?sku=sku_iFHd43ge7daR&amp;interval=MONTHLY&amp;code=PQ47-12KP-BNYP-9X2C#subscribe</p>
+<p>（原帖标注 [失效]，评论区反馈可免费白嫖 Cursor + Grok Bot 一个月，手快有）</p></article><article class="card" id="0024"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>⚡ 新动态 · 高分 78</p>
+<p>【免费送】isvoro 香港 HKT</p>
+<li>平台：NodeSeek · 免费 · 78分</li>
+<li>备注：自己承担 push 10r 玩不来</li>
+<li>来源：nodeseek.com（isvoro 香港HKT 帖）</li></article><article class="card" id="0025"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>DeepSeek Harness 必装的 8 款插件合集。</p>
+<p>标签：#deepseek #DeepSeekHarness #DSH #大肥鱼</p>
+<p>原推：https://x.com/cctv1008/status/2125810581659898206</p></article><article class="card" id="0026"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<p>朋友们来试试我的新插件：当不能清晰描述界面时，快速引用元素，以便 DSH 修改。</p>
+<li>GitHub：https://github.com/Lionad-Morotar/dsh-jump</li>
+<li>功能：DeepSeek Harness Web GUI 的键盘 jump 导航</li></article><article class="card" id="0027"><div class="meta">Chinese original — English translation coming</div><p>来源：置顶推评论区（@cctv1008）</p>
+<a href="https://deepseek-watch.pages.dev" target="_blank" rel="noopener">https://deepseek-watch.pages.dev</a>
+<p>DeepSeek 观测站：持续记录 DeepSeek 公开页面、文档与模型指纹的变化，提供可读解读与 RSS 订阅。</p></article>
 <footer><p style="color:#999">Generated by gen_site.py · <a href="stats.html" style="color:#999">Stats</a></p></footer>
 </body></html>
