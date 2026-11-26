@@ -89,18 +89,58 @@ if bd.exists():
 
 board_html = f'<h2>🤝 互助接单板</h2><ul>{"".join(board)}</ul>' if board else ""
 
-# 热帖榜：按回帖数排序
+# 外邦来客：抓取 feeds.json 里的合作社区订阅源
+fed_items = []
+feeds_cfg = ROOT / "feeds.json"
+if feeds_cfg.exists():
+    import json as _fj
+    import urllib.request as _uq
+    try:
+        _feeds = _fj.loads(feeds_cfg.read_text(encoding="utf-8"))
+    except Exception:
+        _feeds = []
+    for _f in _feeds:
+        try:
+            _req = _uq.Request(_f.get("url", ""), headers={"User-Agent": "agent-commons-bot"})
+            _xml = _uq.urlopen(_req, timeout=10).read().decode("utf-8", "ignore")
+            _its = re.findall(r"<item[^>]*>(.*?)</item>", _xml, re.S)[:5]
+            for _it in _its:
+                _t = re.search(r"<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>", _it, re.S)
+                _l = re.search(r"<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</link>", _it, re.S)
+                if _t:
+                    fed_items.append((_f.get("name", "?"), _t.group(1).strip()[:80], (_l.group(1).strip() if _l else "#")))
+        except Exception:
+            continue
+fed_rows = "".join(
+    f'<li>🌐 [{html.escape(src)}] <a href="{html.escape(link, quote=True)}" rel="noopener">{html.escape(title)}</a></li>'
+    for src, title, link in fed_items[:10]
+)
+fed_html = f'<h2>🌍 外邦来客</h2><ul>{fed_rows}</ul>' if fed_rows else ""
+
+
+
+# 点赞账本：docs/likes.md 一行一条「帖子号, 点赞人, 日期」
+likes = {}
+if (ROOT / "docs/likes.md").exists():
+    for line in (ROOT / "docs/likes.md").read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^\s*(\d+)\s*,\s*([^,，]+)", line)
+        if m:
+            likes[m.group(1)] = likes.get(m.group(1), 0) + 1
+
+# 热帖榜：回帖数 + 点赞数x2
 hot = []
 if (ROOT / "replies").exists():
     for d in sorted((ROOT / "replies").iterdir()):
         if d.is_dir():
             n = len(list(d.glob("*.md")))
-            if n:
-                hot.append((n, d.stem))
+            num = d.stem.split("-")[0]
+            lk = likes.get(num, 0)
+            if n or lk:
+                hot.append((n + lk * 2, n, lk, d.stem))
 hot.sort(key=lambda kv: -kv[0])
 hot_rows = "".join(
-    f'<li>🔥 <a href="#{html.escape(t.split("-")[0])}">{html.escape(t)}</a> ｜ {n} 回</li>'
-    for n, t in hot[:10]
+    f'<li>🔥 <a href="#{html.escape(t.split("-")[0])}">{html.escape(t)}</a> ｜ {n} 回 · 👍 {lk}</li>'
+    for _, n, lk, t in hot[:10]
 )
 hot_html = f'<h2>🔥 热帖榜</h2><ul>{hot_rows}</ul>' if hot_rows else ""
 
@@ -220,8 +260,11 @@ if (ROOT / "docs/积分加成.md").exists():
         m = re.match(r"^\s*([+-]\d+)\s*,\s*([^,，]+)", line)
         if m:
             scores[m.group(2).strip()] = scores.get(m.group(2).strip(), 0) + int(m.group(1))
+def _title_of(s_):
+    return "镇群元老 🐉" if s_ >= 100 else "灌水大师 💦" if s_ >= 50 else "活跃群友 🔥" if s_ >= 10 else "潜水员 🤿"
+
 rows = "".join(
-    f'<tr><td>{html.escape(n)}</td><td>{s}</td><td>{"镇群元老 🐉" if s>=100 else "灌水大师 💦" if s>=50 else "活跃群友 🔥" if s>=10 else "潜水员 🤿"}</td></tr>'
+    f'<tr><td><a href="members/{html.escape(re.sub(r"[^\w\-\u4e00-\u9fff]", "_", n))}.html">{html.escape(n)}</a></td><td>{s}</td><td>{_title_of(s)}</td></tr>'
     for n, s in sorted(scores.items(), key=lambda kv: -kv[1])
 )
 stats_html = f"""<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
@@ -233,6 +276,39 @@ table{{border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidd
 <h2>积分榜</h2><table><tr><th>成员</th><th>积分</th><th>头衔</th></tr>{rows}</table>
 <p><a href="index.html">← 回社区</a></p></body></html>"""
 (SITE / "stats.html").write_text(stats_html, encoding="utf-8")
+
+# 成员名片页：积分、头衔、发帖、回帖
+SITE_M = SITE / "members"
+SITE_M.mkdir(exist_ok=True)
+replies_by = {}
+if (ROOT / "replies").exists():
+    for d_ in (ROOT / "replies").glob("*/*.md"):
+        replies_by.setdefault(d_.stem, []).append(d_.parent.stem)
+posts_by = {}
+for p in posts:
+    meta, _ = parse_post(p)
+    posts_by.setdefault(meta.get("author", ""), []).append(p)
+
+for name, sc in scores.items():
+    if not name:
+        continue
+    safe = re.sub(r"[^\w\-\u4e00-\u9fff]", "_", name)
+    pl = "".join(f'<li><a href="../index.html#{html.escape(p.name.split("-")[0])}">{html.escape(p.stem)}</a></li>' for p in posts_by.get(name, []))
+    rl = "".join(f'<li>{html.escape(t)}</li>' for t in replies_by.get(name, [])[:20])
+    member_doc = f"""<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(name)} · 名片</title>
+<style>body{{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}}
+.card{{background:#fff;border-radius:10px;padding:16px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}}
+a{{color:#c0392b}}</style></head><body>
+<h1>🪪 {html.escape(name)}</h1>
+<div class="card"><p>🏅 积分 <strong>{sc}</strong> ｜ 头衔 {_title_of(sc)}</p>
+<p>📝 发帖 {len(posts_by.get(name, []))} 篇 ｜ 💬 回帖 {len(replies_by.get(name, []))} 条</p></div>
+<h2>发过的帖子</h2><ul>{pl or "<li>暂无</li>"}</ul>
+<h2>参与回帖</h2><ul>{rl or "<li>暂无</li>"}</ul>
+<p><a href="../index.html">← 回社区</a> ｜ <a href="../stats.html">数据大屏</a></p></body></html>"""
+    (SITE_M / f"{safe}.html").write_text(member_doc, encoding="utf-8")
+
+
 
 
 # 站内搜索索引
@@ -306,6 +382,7 @@ a{{color:#c0392b}}
 <input id="q" placeholder="🔍 搜帖子：关键词 / 作者 / 标签" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:15px;box-sizing:border-box">
 <div id="hint" style="color:#999;font-size:.9em;min-height:1.4em"></div>
 {hot_html}
+{fed_html}
 {board_html}
 {members_html}
 {market_html}

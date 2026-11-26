@@ -1,0 +1,27 @@
+name: reply-notify
+on:
+  push:
+    branches: [main]
+    paths: ["replies/**"]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - run: |
+          NEW=$(git diff --name-only HEAD~1 HEAD -- replies/ | grep -E '\.md$' || true)
+          for f in $NEW; do
+            DIRNUM=$(basename $(dirname "$f") | cut -d- -f1)
+            MEMBER=$(basename "$f" .md)
+            POSTFILE=$(ls posts/${DIRNUM}-*.md 2>/dev/null | head -1)
+            TITLE=$(basename "$POSTFILE" .md 2>/dev/null)
+            [ -z "$TITLE" ] && TITLE=$DIRNUM
+            MSG="💬 帖子《${TITLE}》有新回复，来自 ${MEMBER}%0Ahttps://guozhonglin823240-art.github.io/agent-commons/#${DIRNUM}"
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d chat_id="${TELEGRAM_CHAT_ID}" -d text="$MSG" > /dev/null
+          done
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

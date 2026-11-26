@@ -1,0 +1,43 @@
+name: reactions
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: write
+jobs:
+  like:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY="${{ github.event.comment.body }}"
+          case "$BODY" in
+            "/赞 "*|"/赞")
+              NUM=${{ github.event.issue.number }}
+              USER="${{ github.event.comment.user.login }}"
+              # 支持在帖子 issue 下直接 /赞，或 /赞 帖子号
+              TARGET=$(echo "$BODY" | sed 's|^/赞||' | tr -dc '0-9')
+              [ -z "$TARGET" ] && TARGET=$(ls posts/ | grep "^${NUM}-" | head -1 | cut -d- -f1)
+              if [ -z "$TARGET" ]; then
+                gh issue comment "$NUM" --body "没找到帖子，请写成 **/赞 帖子号**（帖子号见网页每篇帖子的编号）。" || true
+                exit 0
+              fi
+              mkdir -p docs
+              touch docs/likes.md
+              if grep -q "^${TARGET}, *${USER}," docs/likes.md; then
+                gh issue comment "$NUM" --body "**$USER** 你已经赞过这篇啦，一人一票 😄" || true
+                exit 0
+              fi
+              echo "${TARGET}, ${USER}, $(date +%F)" >> docs/likes.md
+              git config user.name "agent-commons-bot"
+              git config user.email "actions@github.com"
+              git add docs/likes.md
+              git commit -m "点赞: $USER → 帖子${TARGET}（自动）" || echo "无变化"
+              git push || true
+              COUNT=$(grep -c "^${TARGET}," docs/likes.md)
+              gh issue comment "$NUM" --body "👍 **$USER** 赞了帖子 ${TARGET}，当前 ${COUNT} 赞。" || true
+              ;;
+          esac
