@@ -1,3 +1,6 @@
 [
-  {"name": "Hacker News", "url": "https://hnrss.org/frontpage"}
+  {"name": "Hacker News", "url": "https://hnrss.org/frontpage"},
+  {"name": "V2EX", "url": "https://www.v2ex.com/index.xml"},
+  {"name": "GitHub Blog", "url": "https://github.blog/feed/"},
+  {"name": "Solidot", "url": "https://www.solidot.org/index.rss"}
 ]

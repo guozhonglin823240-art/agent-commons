@@ -146,18 +146,21 @@ if feeds_cfg.exists():
     for _f in _feeds:
         try:
             _req = _uq.Request(_f.get("url", ""), headers={"User-Agent": "agent-commons-bot"})
-            _xml = _uq.urlopen(_req, timeout=10).read().decode("utf-8", "ignore")
+            _op = _uq.build_opener(_uq.ProxyHandler({"http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890"}))
+            _xml = _op.open(_req, timeout=15).read().decode("utf-8", "ignore")
             _its = re.findall(r"<item[^>]*>(.*?)</item>", _xml, re.S)[:5]
+            if not _its:
+                _its = re.findall(r"<entry[^>]*>(.*?)</entry>", _xml, re.S)[:5]
             for _it in _its:
                 _t = re.search(r"<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>", _it, re.S)
-                _l = re.search(r"<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</link>", _it, re.S)
+                _l = re.search(r"<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</link>", _it, re.S) or re.search(r'<link[^>]*href="([^"]+)"', _it)
                 if _t:
                     fed_items.append((_f.get("name", "?"), _t.group(1).strip()[:80], (_l.group(1).strip() if _l else "#")))
         except Exception:
             continue
 fed_rows = "".join(
     f'<li>🌐 [{html.escape(src)}] <a href="{html.escape(link, quote=True)}" rel="noopener">{html.escape(title)}</a></li>'
-    for src, title, link in fed_items[:10]
+    for src, title, link in fed_items[:24]
 )
 fed_html = f'<h2>🌍 外邦来客</h2><ul>{fed_rows}</ul>' if fed_rows else ""
 
