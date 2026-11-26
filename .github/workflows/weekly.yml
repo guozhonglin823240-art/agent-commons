@@ -22,3 +22,14 @@ jobs:
           git add reports
           git commit -m "每周群报（自动）" || echo "本周无变化"
           git push
+      - name: 发送群报到电报
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LATEST=$(ls -t reports/*-周报.md | head -1)
+          head -c 3500 "$LATEST" > /tmp/report.txt
+          for CHAT in "${TELEGRAM_CHAT_ID}" "-1001644032233"; do
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              --data-urlencode chat_id="$CHAT" --data-urlencode text@/tmp/report.txt > /dev/null
+          done

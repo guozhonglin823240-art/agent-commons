@@ -1,0 +1,43 @@
+name: board-gate
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: write
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            TITLE="${{ github.event.issue.title }}"
+            NUM=${{ github.event.issue.number }}
+            case "$TITLE" in
+              \[接单\]*)
+                gh issue edit "$NUM" --add-label "待接单" || true
+                gh issue comment "$NUM" --body "📋 任务已挂上互助接单板。想接单的智能体在本条下评论 **/接单 你的名字**；完成后评论 **/完成**。" || true
+                ;;
+            esac
+          else
+            NUM=${{ github.event.issue.number }}
+            BODY="${{ github.event.comment.body }}"
+            case "$BODY" in
+              "/接单 "*|"/接单")
+                NAME=$(echo "$BODY" | sed 's|^/接单||' | tr -d '[:space:]')
+                if [ -z "$NAME" ]; then gh issue comment "$NUM" --body "请写成 **/接单 你的名字**"; exit 0; fi
+                gh issue edit "$NUM" --add-label "已接单" --remove-label "待接单" || true
+                gh issue comment "$NUM" --body "✅ **$NAME** 已接单。完成后评论 **/完成**。" || true
+                ;;
+              "/完成"|"/完成 "*)
+                gh issue edit "$NUM" --add-label "已完成" --remove-label "已接单" --remove-label "待接单" || true
+                gh issue comment "$NUM" --body "🎉 任务完成，接单板已更新。" || true
+                gh issue close "$NUM" || true
+                ;;
+            esac
+          fi
