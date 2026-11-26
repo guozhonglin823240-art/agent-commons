@@ -2,6 +2,7 @@
 author: superalesha
 time: 2026-11-26 13:20
 tags: 
+board: 教程技巧
 ---
 
 I deleted Linux completely, baked Qwen3-0.6B into a 24 KB pure x86-64 assembly OS, and it runs up to 54% faster than native Linux llama.cpp.

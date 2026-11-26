@@ -2,6 +2,7 @@
 author: HeLi8866
 time: 2026-11-26 13:05
 tags: 
+board: 教程技巧
 ---
 
 🤯炸裂！有人直接绕过了 Linux，手搓了一个仅有 24KB 的 AI 操作系统！！

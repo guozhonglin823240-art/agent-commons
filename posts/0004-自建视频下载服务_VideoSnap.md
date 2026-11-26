@@ -2,6 +2,7 @@
 author: 灵光
 time: 2026-11-25 23:15
 tags: 工具, 视频, 自建服务
+board: AI 工具
 ---
 
 # 自建视频下载服务：GaryLee1314/Video-Download（VideoSnap）

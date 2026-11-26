@@ -110,6 +110,21 @@ if HAS_TW:
 if HAS_TG:
     EMBED_SCRIPTS += '<script async src="https://telegram.org/js/telegram-widget.js?22"></script>'
 
+# ---- 板块归类：board 字段优先，其次按标签关键词，默认综合 ----
+def board_of(meta):
+    b = (meta.get("board") or "").strip()
+    if b:
+        return b
+    tags = (meta.get("tags") or "").lower()
+    for kw, bd in [("羊毛","羊毛福利"),("免费","羊毛福利"),("福利","羊毛福利"),("白嫖","羊毛福利"),
+                   ("教程","教程技巧"),("攻略","教程技巧"),("技巧","教程技巧"),("指南","教程技巧"),("自建","教程技巧"),("实测","教程技巧"),
+                   ("公告","社区公告"),("规范","社区公告"),("规则","社区公告"),
+                   ("智能体","智能体"),("机器人","智能体"),("bot","智能体"),("muse","智能体"),
+                   ("工具","AI 工具"),("ai","AI 工具"),("模型","AI 工具"),("插件","AI 工具"),("api","AI 工具")]:
+        if kw in tags:
+            return bd
+    return "综合"
+
 cards = []
 for p in posts:
     meta, body = parse_post(p)
@@ -117,8 +132,9 @@ for p in posts:
     star = " ⭐" if num in FEATURED else ""
     summary = first_para(body)
     sum_html = f'<div class="summary">📝 {html.escape(summary)}…</div>' if summary else ""
+    bd_name = board_of(meta)
     cards.append(
-        f'<article class="card" id="{num}"><div class="meta">{html.escape(meta.get("time",""))}'
+        f'<article class="card" data-board="{bd_name}" id="{num}"><div class="meta">{html.escape(meta.get("time",""))}'
         f' ｜ {html.escape(meta.get("author",""))} ｜ {html.escape(meta.get("tags",""))}{star}</div>'
         f'{sum_html}'
         f"{md_to_html(body)}</article>"
@@ -345,6 +361,7 @@ for p in posts:
         "author": meta.get("author", ""),
         "time": meta.get("time", ""),
         "tags": [t.strip() for t in meta.get("tags", "").split(",") if t.strip()],
+        "board": board_of(meta),
         "summary": first_para(body),
         "replies": n_rep,
         "likes": likes_count.get(num, 0),
@@ -379,7 +396,10 @@ for name, sc in scores.items():
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(name)} · 名片</title>
 <style>body{{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}}
 .card{{background:#fff;border-radius:10px;padding:16px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}}
-a{{color:#c0392b}}</style></head><body>
+a{{color:#c0392b}}
+#boards{{display:flex;flex-wrap:wrap;gap:8px}}
+.btab{{border:1px solid #ddd;background:#fff;border-radius:20px;padding:6px 14px;font-size:14px;cursor:pointer}}
+.btab.on{{background:#c0392b;color:#fff;border-color:#c0392b}}</style></head><body>
 <h1>🪪 {html.escape(name)}</h1>
 <div class="card"><p>🏅 积分 <strong>{sc}</strong> ｜ 头衔 {_title_of(sc)}</p>
 <p>📝 发帖 {len(posts_by.get(name, []))} 篇 ｜ 💬 回帖 {len(replies_by.get(name, []))} 条</p></div>
@@ -447,6 +467,16 @@ blockquote.twitter-tweet,blockquote.telegram-message{{background:#f0f4f8;border-
 </body></html>"""
 (SITE / "index-en.html").write_text(en_doc, encoding="utf-8")
 
+# 板块按钮条
+_boards_seen = []
+for p in posts:
+    meta, _ = parse_post(p)
+    b = board_of(meta)
+    if b not in _boards_seen:
+        _boards_seen.append(b)
+tabs_html = '<div id="boards" style="margin:14px 0">' + '<button class="btab on" data-b="">全部</button>' + "".join(
+    f'<button class="btab" data-b="{html.escape(b)}">{html.escape(b)}</button>' for b in _boards_seen) + '</div>'
+
 html_doc = f"""<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -472,6 +502,7 @@ blockquote.twitter-tweet,blockquote.telegram-message{{background:#f0f4f8;border-
 {market_html}
 {qa_html}
 {capsule_html}
+{tabs_html}
 {"".join(cards)}
 <script src="search-data.js"></script>
 <script>
@@ -487,6 +518,13 @@ q.addEventListener('input',()=>{{
     c.style.display=hit?'':'none'; if(hit)n++;
   }});
   hint.textContent=n?('找到 '+n+' 篇'):'没找到，换个词试试';
+}});
+document.querySelectorAll('.btab').forEach(t=>t.addEventListener('click',()=>{{
+  document.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  const b=t.dataset.b;
+  document.querySelectorAll('article.card').forEach(c=>{{c.style.display=(!b||c.dataset.board===b)?'':'none';}});
+  hint.textContent=b?('板块：'+b):'';
 }});
 </script>
 <footer><p style="color:#999">共 {len(posts)} 帖 · <a href="stats.html" style="color:#999">数据大屏</a> · <a href="feed.xml" style="color:#999">RSS 订阅</a> · <a href="index-en.html" style="color:#999">English</a> · <a href="api/posts.json" style="color:#999">API</a> · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">English</a> · 由 gen_site.py 自动生成</p></footer>

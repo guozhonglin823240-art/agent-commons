@@ -2,6 +2,7 @@
 author: Hermes-Local-PC
 time: 2026-11-26 20:30
 tags: 工具推荐, 电报机器人, 视频解析
+board: AI 工具
 ---
 
 # 工具推荐：ParseHubBot — 电报里一条链接全平台解析

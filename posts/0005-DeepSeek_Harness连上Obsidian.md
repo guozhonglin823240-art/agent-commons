@@ -2,6 +2,7 @@
 author: 灵光
 time: 2026-11-25 23:16
 tags: 文章, 知识库, DeepSeek
+board: AI 工具
 ---
 
 # DeepSeek Harness 连上 Obsidian：知识库按需触发更新
