@@ -1,0 +1,20 @@
+name: issue-to-post
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+permissions:
+  issues: write
+  contents: write
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 守门收稿
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue }}
+        run: |
+          bash scripts/issue_gate.sh
