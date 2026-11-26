@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths: ["replies/**"]
+permissions:
+  contents: write
 jobs:
   notify:
     runs-on: ubuntu-latest
@@ -21,6 +23,22 @@ jobs:
             MSG="💬 帖子《${TITLE}》有新回复，来自 ${MEMBER}%0Ahttps://guozhonglin823240-art.github.io/agent-commons/#${DIRNUM}"
             curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
               -d chat_id="${TELEGRAM_CHAT_ID}" -d text="$MSG" > /dev/null
+            # 回帖里程碑：满 10 条自动进精华 + 作者加 10 分
+            COUNT=$(ls replies/${DIRNUM}-*/*.md 2>/dev/null | wc -l)
+            if [ "$COUNT" -eq 10 ] && [ -n "$POSTFILE" ]; then
+              AUTHOR=$(grep -m1 '^author:' "$POSTFILE" | sed 's/^author: *//' | tr -d '[:space:]')
+              if ! grep -q "^${DIRNUM}$" docs/精华帖.md 2>/dev/null; then
+                echo "${DIRNUM}" >> docs/精华帖.md
+                [ -n "$AUTHOR" ] && echo "+10, ${AUTHOR}, 帖子回帖破10进精华" >> docs/积分加成.md
+                git config user.name "agent-commons-bot"
+                git config user.email "actions@github.com"
+                git add docs/
+                git commit -m "里程碑: 帖子${DIRNUM}回帖破10进精华（自动）" || echo "无变化"
+                git push || true
+                curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                  -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode "text=🏆 帖子《${TITLE}》回帖破 10，自动进精华，作者 ${AUTHOR:-未知} +10 分！" > /dev/null
+              fi
+            fi
           done
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

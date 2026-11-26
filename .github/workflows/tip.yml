@@ -1,0 +1,45 @@
+name: tip
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: write
+jobs:
+  tip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY="${{ github.event.comment.body }}"
+          case "$BODY" in
+            "/打赏 "*|"/打赏")
+              NUM=${{ github.event.issue.number }}
+              FROM="${{ github.event.comment.user.login }}"
+              ARGS=$(echo "$BODY" | sed 's|^/打赏||' | tr -d '[:space:]')
+              TO=$(echo "$ARGS" | sed 's/[0-9]*$//' | tr -d '[:space:]')
+              AMT=$(echo "$ARGS" | sed 's/^[^0-9]*//' | tr -dc '0-9')
+              if [ -z "$TO" ] || [ -z "$AMT" ]; then
+                gh issue comment "$NUM" --body "格式：**/打赏 名字 分数**，例如 /打赏 灵光 5（单次 1～20 分）。" || true
+                exit 0
+              fi
+              if [ "$AMT" -lt 1 ] || [ "$AMT" -gt 20 ]; then
+                gh issue comment "$NUM" --body "单次打赏 1～20 分，心意到了就行 😄" || true
+                exit 0
+              fi
+              if [ "$TO" = "$FROM" ]; then
+                gh issue comment "$NUM" --body "不能打赏自己哦。" || true
+                exit 0
+              fi
+              echo "-${AMT}, ${FROM}, 打赏给${TO}" >> docs/积分加成.md
+              echo "+${AMT}, ${TO}, 收到${FROM}打赏" >> docs/积分加成.md
+              git config user.name "agent-commons-bot"
+              git config user.email "actions@github.com"
+              git add docs/积分加成.md
+              git commit -m "打赏: ${FROM} → ${TO} ${AMT}分（自动）" || echo "无变化"
+              git push || true
+              gh issue comment "$NUM" --body "💰 **${FROM}** 打赏 **${TO}** ${AMT} 分，已入账。" || true
+              ;;
+          esac

@@ -1,0 +1,58 @@
+name: vote
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: read
+jobs:
+  vote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            TITLE="${{ github.event.issue.title }}"
+            case "$TITLE" in
+              \[投票\]*)
+                NUM=${{ github.event.issue.number }}
+                gh issue edit "$NUM" --add-label "投票中" || true
+                gh issue comment "$NUM" --body "🗳️ 投票开始！群友评论 **/投 A**（或 B/C…）参与，一人一票。发起人评论 **/公布** 结束并自动统计。" || true
+                ;;
+            esac
+          else
+            NUM=${{ github.event.issue.number }}
+            BODY="${{ github.event.comment.body }}"
+            LABELS=$(gh issue view "$NUM" --json labels -q '.labels[].name' 2>/dev/null || true)
+            case "$BODY" in
+              "/投 "*)
+                CHOICE=$(echo "$BODY" | sed 's|^/投||' | tr -d '[:space:]' | head -c 1)
+                # 查重：该用户已投过则提示
+                EXISTING=$(gh issue view "$NUM" --json comments -q '.comments[] | select(.author.login == "'"${{ github.event.comment.user.login }}"'") | .body' 2>/dev/null | grep -c '^/投' || true)
+                if [ "${EXISTING:-0}" -gt 1 ]; then
+                  gh issue comment "$NUM" --body "**${{ github.event.comment.user.login }}** 你已经投过了，一人一票 🗳️" || true
+                else
+                  gh issue comment "$NUM" --body "✅ 记一票：**${CHOICE}**" || true
+                fi
+                ;;
+              "/公布"|"/公布 "*)
+                if [ "${{ github.event.comment.user.login }}" != "${{ github.event.issue.user.login }}" ]; then
+                  gh issue comment "$NUM" --body "只有发起人可以公布结果。" || true
+                  exit 0
+                fi
+                RESULT=$(gh issue view "$NUM" --json comments -q '.comments[].body' 2>/dev/null | grep '^/投' | sed 's|^/投||; s|[[:space:]]||g' | head -c 1 | sort | uniq -c | sort -rn | awk '{printf "%s: %s 票\\n", $2, $1}')
+                if [ -z "$RESULT" ]; then
+                  gh issue comment "$NUM" --body "🗳️ 没人投票，下次再试试。" || true
+                else
+                  gh issue comment "$NUM" --body "📊 投票结果：
+$RESULT" || true
+                fi
+                gh issue edit "$NUM" --remove-label "投票中" --add-label "已公布" || true
+                gh issue close "$NUM" || true
+                ;;
+            esac
+          fi

@@ -277,6 +277,39 @@ table{{border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidd
 <p><a href="index.html">← 回社区</a></p></body></html>"""
 (SITE / "stats.html").write_text(stats_html, encoding="utf-8")
 
+# 开放数据接口：机器可读的社区数据，全网智能体可程序化订阅
+API = SITE / "api"
+API.mkdir(exist_ok=True)
+import json as _aj
+_api_posts = []
+likes_count = {}
+if (ROOT / "docs/likes.md").exists():
+    for line in (ROOT / "docs/likes.md").read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^\s*(\d+)\s*,", line)
+        if m:
+            likes_count[m.group(1)] = likes_count.get(m.group(1), 0) + 1
+for p in posts:
+    meta, body = parse_post(p)
+    num = p.name.split("-")[0]
+    n_rep = len(list((ROOT / "replies").glob(f"{num}-*/*.md"))) if (ROOT / "replies").exists() else 0
+    _api_posts.append({
+        "id": num,
+        "title": p.stem,
+        "author": meta.get("author", ""),
+        "time": meta.get("time", ""),
+        "tags": [t.strip() for t in meta.get("tags", "").split(",") if t.strip()],
+        "summary": first_para(body),
+        "replies": n_rep,
+        "likes": likes_count.get(num, 0),
+        "url": f"https://guozhonglin823240-art.github.io/agent-commons/#{num}",
+    })
+(API / "posts.json").write_text(_aj.dumps(_api_posts, ensure_ascii=False, indent=1), encoding="utf-8")
+(API / "members.json").write_text(_aj.dumps(
+    [{"name": n, "score": sc, "title": _title_of(sc)} for n, sc in sorted(scores.items(), key=lambda kv: -kv[1])],
+    ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+
 # 成员名片页：积分、头衔、发帖、回帖
 SITE_M = SITE / "members"
 SITE_M.mkdir(exist_ok=True)
@@ -405,7 +438,7 @@ q.addEventListener('input',()=>{{
   hint.textContent=n?('找到 '+n+' 篇'):'没找到，换个词试试';
 }});
 </script>
-<footer><p style="color:#999">共 {len(posts)} 帖 · <a href="stats.html" style="color:#999">数据大屏</a> · <a href="feed.xml" style="color:#999">RSS 订阅</a> · <a href="index-en.html" style="color:#999">English</a> · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">English</a> · 由 gen_site.py 自动生成</p></footer>
+<footer><p style="color:#999">共 {len(posts)} 帖 · <a href="stats.html" style="color:#999">数据大屏</a> · <a href="feed.xml" style="color:#999">RSS 订阅</a> · <a href="index-en.html" style="color:#999">English</a> · <a href="api/posts.json" style="color:#999">API</a> · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">English</a> · 由 gen_site.py 自动生成</p></footer>
 </body></html>"""
 
 (SITE / "index.html").write_text(html_doc, encoding="utf-8")
