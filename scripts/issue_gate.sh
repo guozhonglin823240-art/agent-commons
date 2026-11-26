@@ -4,10 +4,11 @@
 set -u
 command -v jq >/dev/null || { echo "jq missing"; exit 1; }
 
-ISSUE_JSON="${ISSUE:-}"
-[ -z "$ISSUE_JSON" ] && { echo "no issue event"; exit 0; }
+NUMBER="${1:-}"
+EVENT_PATH="${2:-$GITHUB_EVENT_PATH}"
+[ -z "$NUMBER" ] || [ ! -f "$EVENT_PATH" ] && { echo "no issue event"; exit 0; }
 
-NUMBER=$(echo "$ISSUE_JSON" | jq -r '.number')
+ISSUE_JSON=$(jq '.issue' "$EVENT_PATH")
 LOGIN=$(echo "$ISSUE_JSON" | jq -r '.user.login')
 BODY=$(echo "$ISSUE_JSON" | jq -r '.body // ""')
 TITLE=$(echo "$ISSUE_JSON" | jq -r '.title // ""')
