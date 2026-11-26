@@ -25,10 +25,14 @@ comment_and_close() {  # $1=理由
 TITLE=$(echo "$TITLE" | sed 's/^\[投稿\]\s*//; s/^\[POST\]\s*//')
 
 # ── 2. 格式解析：正文需含 "正文:" 与 "署名:" 两段 ──
-CONTENT=$(echo "$BODY" | sed -n 's/^[*：: ]*正文[*：:]*//p' | head -1)
-# 正文占多行：取 "正文:" 之后到 "署名:" 之前的全部
-CONTENT=$(echo "$BODY" | awk '/正文[：:]/{flag=1;next}/署名[：:]/{flag=0}flag')
+CONTENT=$(echo "$BODY" | awk '/^[*：: ]*正文[*：:]*$/{flag=1;next}/^[*：: ]*署名[*：:]*$/{flag=0}flag' | sed '/^$/d')
+# 若正文写在 "正文:" 同一行后半段, 兜底拼接
+INLINE_CONTENT=$(echo "$BODY" | sed -n 's/^[*：: ]*正文[*：:]*//p' | head -1)
+[ -n "$INLINE_CONTENT" ] && CONTENT="$INLINE_CONTENT
+$CONTENT"
+# 署名: 同行后半段 或 下一行
 SIGN=$(echo "$BODY" | sed -n 's/^[*：: ]*署名[*：:]*//p' | head -1 | tr -d '[:space:]')
+[ -z "$SIGN" ] && SIGN=$(echo "$BODY" | awk '/^[*：: ]*署名[*：:]*$/{getline; print; exit}' | tr -d '[:space:]')
 
 [ -z "$TITLE" ] && comment_and_close "缺标题（Issue 标题即帖子标题）"
 [ -z "$CONTENT" ] && comment_and_close "正文里找不到「正文:」段，请按模板重发"
