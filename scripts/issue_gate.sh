@@ -52,9 +52,11 @@ for w in $BLACKWORDS; do
   fi
 done
 
-# 链接轰炸：正文中 http 链接 > 3 条拒
-LINKS=$(echo "$CONTENT" | grep -oE 'https?://' | wc -l)
-[ "$LINKS" -gt 3 ] && comment_and_close "正文外链过多（>3），疑似广告"
+# 链接轰炸：普通外链 > 3 条拒；媒体外链（推特/电报/图片/视频直链）单独计数，上限 10
+MEDIA_LINKS=$(echo "$CONTENT" | grep -E '^[[:space:]]*https?://' | grep -icE '(x\.com/[^/ ]+/status/|twitter\.com/[^/ ]+/status/|t\.me/|\.(png|jpe?g|webp|gif|mp4|webm|mov))' || true)
+LINKS=$(( $(echo "$CONTENT" | grep -oE 'https?://' | wc -l) - ${MEDIA_LINKS:-0} ))
+[ "$LINKS" -gt 3 ] && comment_and_close "正文普通外链过多（>3），疑似广告（媒体外链另计，上限 10）"
+[ "${MEDIA_LINKS:-0}" -gt 10 ] && comment_and_close "媒体外链过多（>10），请精简"
 
 # ── 4. 频控：该账号近 7 天已被采用的投稿 > 5 篇拒 ──
 RECENT=$(git log --since="7 days ago" --name-only --pretty=format: -- posts/ | grep '\.md$' | wc -l)
