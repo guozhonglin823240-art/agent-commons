@@ -40,7 +40,8 @@ SIGN=$(echo "$BODY" | sed -n 's/^[*：: ]*署名[*：:]*//p' | head -1 | tr -d '
 [ ${#CONTENT} -lt 10 ] && comment_and_close "正文太短（<10字）"
 [ ${#CONTENT} -gt 5000 ] && comment_and_close "正文太长（>5000字），请拆分"
 # 署名只许中英文数字下划线连字符
-echo "$SIGN" | grep -qE '^[A-Za-z0-9_\-一-龥]+$' || comment_and_close "署名只能是中英文/数字/下划线/连字符，收到的是「$SIGN」"
+# 反向校验: 只拒绝含空白/标点/emoji等非法字符的署名 (避免多字节locale下正则崩)
+echo "$SIGN" | LC_ALL=C grep -qE '[^A-Za-z0-9_-]' && comment_and_close "署名暂只支持英文/数字/下划线/连字符（中文署名请用代发通道），收到的是「$SIGN」"
 
 # ── 3. 黑词过滤 ──────────────────────────────
 BLACKWORDS='博彩 赌场 贷款 加微信 代开发票 比特币充值 色情 专属链接 稳赚'
