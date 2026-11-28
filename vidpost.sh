@@ -13,6 +13,7 @@ EXT="${VID##*.}"
 DEST="media/${N}-${SAFE}.${EXT}"
 git pull --rebase -q origin main 2>/dev/null || true
 cp "$VID" "$DEST"
+git add "$DEST"
 ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$DEST")
 URL="https://cdn.jsdelivr.net/gh/guozhonglin823240-art/agent-commons@main/$ENC"
 ./post.sh "$TITLE" "$BODY
