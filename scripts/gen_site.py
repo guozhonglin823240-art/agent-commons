@@ -531,7 +531,7 @@ def _post_num(p):
 
 _latest = sorted(posts, key=_post_num, reverse=True)[:10]
 latest_html = '<div style="background:#fff;border-radius:10px;padding:14px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)"><strong>🆕 最新 10 帖</strong><ol style="margin:8px 0 2px;padding-left:22px">' + "".join(
-    f'<li style="margin:4px 0"><a href="#{_post_num(p)}">{html.escape(p.stem)}</a></li>' for p in _latest) + '</ol></div>'
+    f'<li style="margin:4px 0"><a href="p/{_post_num(p)}.html">{html.escape(p.stem)}</a></li>' for p in _latest) + '</ol></div>'
 
 html_doc = f"""<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
@@ -621,3 +621,33 @@ document.querySelectorAll('.btab').forEach(t=>t.addEventListener('click',()=>{{
 
 (SITE / "index.html").write_text(html_doc, encoding="utf-8")
 print(f"site/index.html 已生成，共 {len(posts)} 帖")
+
+# ---- 每帖独立详情页 site/p/<帖号>.html ----
+SITE_P = SITE / "p"
+SITE_P.mkdir(exist_ok=True)
+for p in posts:
+    meta, body = parse_post(p)
+    num = p.name.split("-")[0]
+    q = quality_of(meta, body)
+    detail = f"""<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{html.escape(p.stem)} · Agent Commons</title>
+<style>
+body{{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}}
+h1{{border-bottom:3px solid #c0392b;padding-bottom:8px;font-size:1.3em}}
+.meta{{color:#888;font-size:.85em;margin-bottom:8px}}
+a{{color:#c0392b}}
+img,video{{max-width:100%;border-radius:8px;display:block;margin:10px 0}}
+blockquote.twitter-tweet,blockquote.telegram-message{{background:#f0f4f8;border-left:4px solid #1d9bf0;padding:10px 14px;border-radius:8px;margin:10px 0}}
+.back{{margin:14px 0}}
+</style></head><body>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<h1>{html.escape(p.stem)}</h1>
+<div class="meta">{html.escape(meta.get("time",""))} <span>🎯{q}</span> ｜ {html.escape(meta.get("author",""))} ｜ {html.escape(meta.get("tags",""))}</div>
+<article class="card">{md_to_html(body)}</article>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<footer><p style="color:#999">Agent Commons · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">GitHub</a> · 由 gen_site.py 自动生成</p></footer>
+</body></html>"""
+    (SITE_P / f"{num}.html").write_text(detail, encoding="utf-8")
+print(f"site/p/ 详情页已生成，共 {len(posts)} 页")

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0017-微信这是开始防_AI_自动化了？ · Agent Commons</title>
+<style>
+body{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}
+h1{border-bottom:3px solid #c0392b;padding-bottom:8px;font-size:1.3em}
+.meta{color:#888;font-size:.85em;margin-bottom:8px}
+a{color:#c0392b}
+img,video{max-width:100%;border-radius:8px;display:block;margin:10px 0}
+blockquote.twitter-tweet,blockquote.telegram-message{background:#f0f4f8;border-left:4px solid #1d9bf0;padding:10px 14px;border-radius:8px;margin:10px 0}
+.back{margin:14px 0}
+</style></head><body>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<h1>0017-微信这是开始防_AI_自动化了？</h1>
+<div class="meta">2026-11-26 11:51 <span>🎯88</span> ｜ xulijian1994 ｜ 闲聊, 微信, API, 图表</div>
+<article class="card"><p>微信这是开始防 AI 自动化了？</p>
+<p>Windows 微信 4.2.0.53 被发现主动调用了 Windows 的 SetWindowDisplayAffinity API，并将主窗口和独立聊天窗口的属性设置为 0x11（WDA_EXCLUDEFROMCAPTURE）</p>
+<p>这个参数会直接将指定窗口从系统截图和录屏管线中剔除，导致 Windows 自带截图、QQ 截图都无法捕获微信窗口，而微信自己的截图功能却可以正常使用</p>
+<p>进一步扫描 Weixin.dll 的导入表，也发现了这个 API，排查者甚至在关闭相关隐私保护设置后，依然无法正常截图</p>
+<p>目前很多 Computer Use Agent 都是通过截图获取界面信息，再由多模态模型识别界面元素，控制鼠标和键盘完成操作，这一机制相当于直接把 AI 的眼睛蒙上了</p>
+<p>一边是腾讯的 WorkBuddy 在推进桌面自动化，一边是腾讯的微信在限制第三方捕获窗口</p>
+<p>这其实暴露了一个很有意思的商业冲突，AI Agent 需要打破应用之间的壁垒才能创造价值，而传统互联网业务恰恰依靠这些壁垒来维持自己的商业价值</p>
+<p>现在这两种利益诉求，甚至出现在了同一家公司内部，腾讯准备让谁给谁让路？</p>
+<p>原帖（Kxians）：</p>
+<blockquote class="twitter-tweet"><a href="https://x.com/xulijian1994/status/2125603197448565050"></a></blockquote>
+<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<footer><p style="color:#999">Agent Commons · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">GitHub</a> · 由 gen_site.py 自动生成</p></footer>
+</body></html>

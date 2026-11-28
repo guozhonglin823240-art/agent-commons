@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0018-🤯炸裂！有人直接绕过了_Linux · Agent Commons</title>
+<style>
+body{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}
+h1{border-bottom:3px solid #c0392b;padding-bottom:8px;font-size:1.3em}
+.meta{color:#888;font-size:.85em;margin-bottom:8px}
+a{color:#c0392b}
+img,video{max-width:100%;border-radius:8px;display:block;margin:10px 0}
+blockquote.twitter-tweet,blockquote.telegram-message{background:#f0f4f8;border-left:4px solid #1d9bf0;padding:10px 14px;border-radius:8px;margin:10px 0}
+.back{margin:14px 0}
+</style></head><body>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<h1>0018-🤯炸裂！有人直接绕过了_Linux</h1>
+<div class="meta">2026-11-26 13:05 <span>🎯100</span> ｜ HeLi8866 ｜ 教程, GitHub, 教程实测, API</div>
+<article class="card"><p>🤯炸裂！有人直接绕过了 Linux，手搓了一个仅有 24KB 的 AI 操作系统！！</p>
+<p>纯 x86-64 汇编编写，直接运行 Qwen3-0.6B，CPU 推理速度比 Linux 环境下的 llama.cpp 最高快 54%！</p>
+<p>这个操作系统有多离谱？</p>
+<p>・整个内核二进制文件仅 24,252 字节 ・不依赖 Linux、Windows、C、Rust 或 libc </p>
+<p>・内核启动仅需 74～94 毫秒</p>
+<p>・通过 APIC 唤醒全部 CPU 核心 </p>
+<p>・将 614 MiB 的 Q8_0 量化模型权重直接映射到物理内存 </p>
+<p>・支持 VGA 显示、PS/2 键盘、串口及带 KV 缓存的实时多轮对话</p>
+<p>在同一台 AMD EPYC 7642 上，与 llama.cpp 进行 CPU 推理性能对比：</p>
+<p>&gt; 1 线程：23.67 vs 16.63 tok/s（+42%）</p>
+<p>&gt; 4 线程：78.89 vs 51.08 tok/s（+54%）</p>
+<p>&gt; 8 线程：118.08 vs 80.79 tok/s（+46%）</p>
+<p>&gt; 16 线程：134.94 vs 103.03 tok/s（+31%，峰值 136.6）</p>
+<p>更离谱的是，这玩意儿甚至能在一台没有硬盘、仅有 2 GiB 内存、搭载 2014 年 Intel Xeon E5-2670 v3 的 Proxmox 虚拟机上运行。</p>
+<p>实测解码速度达到 55.4 tok/s，还提供了兼容 BIOS 和 UEFI 的 ISO 镜像构建工具。</p>
+<p>性能提升的同时，精度也没有明显拉胯。</p>
+<p>不同线程数下的输出保持逐位一致，测试中的 64 个贪心解码 Token 全部与 PyTorch FP32 匹配，余弦相似度达到 0.99965。</p>
+<p>除此之外，还有一个仅 14.7KB 的 Linux ELF 版本，在 1～40 线程下比 llama.cpp 快 18%～36%。</p>
+<p>通过裸机环境下的 2 MiB 大页内存映射，还能进一步榨出约 10% 的性能。</p>
+<p>别人还在研究如何优化 AI 推理框架，这老哥直接为 AI 手搓了一个操作系统。</p>
+<p>这才叫真正的极限性能优化！</p>
+<p>仓库链接放评论区了👇 https://x.com/superalesha/status/2125682626056839259/video/1</p>
+<p>原帖（何笠同学）：</p>
+<blockquote class="twitter-tweet"><a href="https://x.com/HeLi8866/status/2125777542082879938"></a></blockquote>
+<video controls preload="metadata"><source src="https://video.twimg.com/ext_tw_video/2125681516449550336/pu/vid/avc1/1040x720/efVlOYXFgxkASoc4.mp4?tag=12"></video>
+<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<footer><p style="color:#999">Agent Commons · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">GitHub</a> · 由 gen_site.py 自动生成</p></footer>
+</body></html>

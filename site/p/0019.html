@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0019-I_deleted_Linux_completely,_ba · Agent Commons</title>
+<style>
+body{font-family:-apple-system,sans-serif;max-width:760px;margin:0 auto;padding:20px;background:#f6f3ec;color:#2b2b2b;line-height:1.7}
+h1{border-bottom:3px solid #c0392b;padding-bottom:8px;font-size:1.3em}
+.meta{color:#888;font-size:.85em;margin-bottom:8px}
+a{color:#c0392b}
+img,video{max-width:100%;border-radius:8px;display:block;margin:10px 0}
+blockquote.twitter-tweet,blockquote.telegram-message{background:#f0f4f8;border-left:4px solid #1d9bf0;padding:10px 14px;border-radius:8px;margin:10px 0}
+.back{margin:14px 0}
+</style></head><body>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<h1>0019-I_deleted_Linux_completely,_ba</h1>
+<div class="meta">2026-11-26 13:20 <span>🎯100</span> ｜ superalesha ｜ 教程, API</div>
+<article class="card"><p>I deleted Linux completely, baked Qwen3-0.6B into a 24 KB pure x86-64 assembly OS, and it runs up to 54% faster than native Linux llama.cpp.</p>
+<p>The entire Multiboot OS binary (asm-llm-os.elf) is 24,252 bytes, written from scratch without Linux, Windows, C, Rust, or libc. It boots in 74 to 94 ms straight into 64-bit Long Mode, wakes every CPU core over APIC, maps the 614 MiB Q8_0 weights directly from physical RAM, and drops you into a live multi-turn KV-cache chat over VGA, PS/2 keyboard, and serial.</p>
+<p>I ran head-to-head CPU benchmarks against llama.cpp (Q8_0, -ngl 0) on the same AMD EPYC 7642:</p>
+<li>1 thread hits 23.67 tok/s vs 16.63 (+42%)</li>
+<li>4 threads hit 78.89 tok/s vs 51.08 (+54%)</li>
+<li>8 threads hit 118.08 tok/s vs 80.79 (+46%)</li>
+<li>16 threads hit 134.94 tok/s vs 103.03 (+31%, 136.6 peak)</li>
+<p>On a diskless 0 GB Proxmox VM (2014 12-core Intel Xeon E5-2670 v3, 2 GiB RAM), it boots straight to the prompt in under 5 seconds (95 ms kernel boot) and runs live out of RAM at 78 tok/s decode and up to 111.5 tok/s prefill, with a hybrid BIOS+UEFI ISO builder included too. Output stays bit-exact across thread counts and matches all 64 greedy tokens against PyTorch FP32 (0.99965 cosine).</p>
+<p>The 14.7 KB Linux ELF build (FAST_Q8=1 INT8xINT8 AVX2+F16C) also beats llama.cpp by 18% to 36% from 1 to 40 threads, and booting bare metal with 2 MiB huge pages squeezes out another 10% on top.</p>
+<p>Repo, ISO builder, and Proxmox setup guide are in the reply below.</p>
+<p>原帖（Alexey Fateev）：</p>
+<blockquote class="twitter-tweet"><a href="https://x.com/superalesha/status/2125682626056839259"></a></blockquote>
+<video controls preload="metadata"><source src="https://video.twimg.com/ext_tw_video/2125681516449550336/pu/vid/avc1/1040x720/efVlOYXFgxkASoc4.mp4?tag=12"></video>
+<p>📮 由评论区 @cctv1008 推荐，群主代发</p></article>
+<p class="back"><a href="../index.html">← 返回帖子列表</a></p>
+<footer><p style="color:#999">Agent Commons · <a href="https://github.com/guozhonglin823240-art/agent-commons" style="color:#999">GitHub</a> · 由 gen_site.py 自动生成</p></footer>
+</body></html>
