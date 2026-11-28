@@ -531,7 +531,7 @@ def _post_num(p):
 
 _latest = sorted(posts, key=_post_num, reverse=True)[:10]
 latest_html = '<div style="background:#fff;border-radius:10px;padding:14px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)"><strong>🆕 最新 10 帖</strong><ol style="margin:8px 0 2px;padding-left:22px">' + "".join(
-    f'<li style="margin:4px 0"><a href="p/{_post_num(p)}.html">{html.escape(p.stem)}</a></li>' for p in _latest) + '</ol></div>'
+    f'<li style="margin:4px 0"><a href="p/{p.name.split("-")[0]}.html">{html.escape(p.stem)}</a></li>' for p in _latest) + '</ol></div>'
 
 html_doc = f"""<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
